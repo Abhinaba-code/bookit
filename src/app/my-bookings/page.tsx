@@ -83,12 +83,15 @@ export default function MyBookingsPage() {
 
   useEffect(() => {
     const fetchBookings = async () => {
+      if (!user) return;
       setIsLoading(true);
       const result = await getAllBookings();
       
       if (result.success && result.bookings) {
+        const userBookings = result.bookings.filter(b => b.email === user.email);
+
         const enrichedBookings = await Promise.all(
-          result.bookings.filter(b => b.email === user?.email).map(async (booking) => {
+          userBookings.map(async (booking) => {
             const experience = await getExperienceById(booking.experienceId);
             const slot = await getSlotById(booking.slotId);
             return {
