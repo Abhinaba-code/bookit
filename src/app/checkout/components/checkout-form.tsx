@@ -33,10 +33,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Loader2, CalendarIcon, Checkbox } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, CalendarIcon } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   slotId: z.coerce.number().int().positive({ message: "Please select a date." }),
