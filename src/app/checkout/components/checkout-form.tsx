@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -186,7 +186,9 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
             setIsLoading(false);
         }
     }
-    loadData();
+    if (bookingId || experienceId) {
+      loadData();
+    }
   }, [bookingId, experienceId, slotId, form, router, toast]);
 
 
@@ -217,7 +219,7 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
     }
     
     setIsApplyingPromo(true);
-    const result = await validatePromoCode({ code, subtotal });
+    const result = await validatePromoCode({ code, subtotal, userEmail: user?.email });
     setIsApplyingPromo(false);
 
     if (result.valid && result.discountAmount) {
@@ -242,12 +244,13 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
     }
 
     const { bookingToEdit } = checkoutData;
-    const priceDifference = bookingToEdit ? total - bookingToEdit.total : total;
-
+    const originalTotal = bookingToEdit ? bookingToEdit.total : 0;
+    const priceDifference = total - originalTotal;
+    
     if (user && user.balance < priceDifference) {
       toast({
         title: "Insufficient Balance",
-        description: `You do not have enough funds to cover the additional cost of ₹${priceDifference.toFixed(2)}.`,
+        description: `You do not have enough funds to cover the additional cost of ₹${priceDifference.toFixed(2)}. Your balance is ₹${user.balance.toFixed(2)}.`,
         variant: "destructive",
       });
       return;
@@ -516,5 +519,3 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
     </Form>
   );
 }
-
-    

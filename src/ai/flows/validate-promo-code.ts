@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,11 +10,13 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { getStoredBookings } from '@/lib/data';
 import {z} from 'genkit';
 
 const ValidatePromoCodeInputSchema = z.object({
   code: z.string().describe('The promo code to validate.'),
   subtotal: z.number().describe('The subtotal of the booking.'),
+  userEmail: z.string().email().optional().describe('The email of the user applying the code.'),
 });
 export type ValidatePromoCodeInput = z.infer<typeof ValidatePromoCodeInputSchema>;
 
@@ -39,14 +42,40 @@ const validatePromoCodeFlow = ai.defineFlow(
     inputSchema: ValidatePromoCodeInputSchema,
     outputSchema: ValidatePromoCodeOutputSchema,
   },
-  async input => {
-    //TODO implement code that calls the API and returns the result. The below code is simply returning dummy values.
+  async ({ code, subtotal, userEmail }) => {
+    
+    if (code.toUpperCase() !== 'SAVE10') {
+      return {
+        valid: false,
+        reason: 'Invalid promo code.',
+      };
+    }
+
+    // Check if user has already used this code
+    if (userEmail) {
+        const allBookings = getStoredBookings();
+        const hasUsedCode = allBookings.some(
+            booking => booking.email === userEmail && booking.promoCode?.toUpperCase() === 'SAVE10'
+        );
+
+        if (hasUsedCode) {
+            return {
+                valid: false,
+                reason: 'This promo code has already been used.',
+            };
+        }
+    }
+    
+    const discountValue = 10; // 10%
+    const discountAmount = (subtotal * discountValue) / 100;
+    const total = subtotal - discountAmount;
+
     return {
       valid: true,
       type: 'PERCENT',
-      value: 10,
-      discountAmount: 100,
-      total: input.subtotal - 100,
+      value: discountValue,
+      discountAmount: discountAmount,
+      total: total,
       reason: 'Valid promo code',
     };
   }
