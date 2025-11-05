@@ -1,3 +1,4 @@
+
 "use server";
 
 import { z } from "zod";
@@ -75,4 +76,12 @@ export async function createBooking(data: unknown) {
   } catch (e) {
     return { success: false, error: "An unexpected error occurred." };
   }
+}
+
+export async function getBookingById(bookingId: string) {
+    const booking = bookings.find(b => b.id === bookingId);
+    if (!booking) {
+        return { success: false, error: "Booking ID not found." };
+    }
+    return { success: true, booking };
 }
