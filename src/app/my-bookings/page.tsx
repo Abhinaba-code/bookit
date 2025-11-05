@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { Booking, ExperienceDetail, Slot } from "@/types";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 
 type EnrichedBooking = Booking & {
     experienceTitle: string;
@@ -66,9 +68,18 @@ function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel
 }
 
 export default function MyBookingsPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [bookings, setBookings] = useState<EnrichedBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -77,7 +88,7 @@ export default function MyBookingsPage() {
       
       if (result.success && result.bookings) {
         const enrichedBookings = await Promise.all(
-          result.bookings.map(async (booking) => {
+          result.bookings.filter(b => b.email === user?.email).map(async (booking) => {
             const experience = await getExperienceById(booking.experienceId);
             const slot = await getSlotById(booking.slotId);
             return {
@@ -97,12 +108,27 @@ export default function MyBookingsPage() {
       setIsLoading(false);
     };
 
-    fetchBookings();
-  }, [toast]);
+    if(user) {
+        fetchBookings();
+    }
+  }, [toast, user]);
 
   const handleCancelBooking = (bookingId: string) => {
     setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'CANCELLED' } : b));
     toast({ title: "Booking Cancelled", description: "Your booking has been cancelled." });
+  }
+
+  if (loading || !user) {
+    return (
+        <Container className="py-12">
+            <div className="max-w-2xl mx-auto">
+                <div className="space-y-6">
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-96 w-full" />
+                </div>
+            </div>
+        </Container>
+    )
   }
 
   return (
@@ -129,7 +155,7 @@ export default function MyBookingsPage() {
                     <CardContent className="pt-6">
                         <p className="text-center text-muted-foreground">You have no active bookings.</p>
                         <Button asChild className="mt-4 w-full">
-                            <Link href="/">Explore Tours</Link>
+                            <Link href="/dashboard">Explore Tours</Link>
                         </Button>
                     </CardContent>
                 </Card>

@@ -28,6 +28,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { EditRequestDialog } from "./components/edit-request-dialog";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type EnrichedCallbackRequest = CallbackRequest & { experienceTitle?: string };
 type EnrichedMessageRequest = MessageRequest & { experienceTitle?: string };
@@ -49,11 +52,20 @@ async function enrichRequests<T extends CallbackRequest | MessageRequest>(reques
 }
 
 export default function AdminRequestsPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [callbackRequests, setCallbackRequests] = useState<EnrichedCallbackRequest[]>([]);
   const [messageRequests, setMessageRequests] = useState<EnrichedMessageRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
 
   const fetchAndSetData = async () => {
       setIsLoading(true);
@@ -74,8 +86,10 @@ export default function AdminRequestsPage() {
   }
 
   useEffect(() => {
-    fetchAndSetData();
-  }, []);
+    if(user) {
+        fetchAndSetData();
+    }
+  }, [user]);
   
   const handleDeleteCallback = (id: string) => {
     startDeleteTransition(async () => {
@@ -103,6 +117,17 @@ export default function AdminRequestsPage() {
 
   const handleUpdate = () => {
     fetchAndSetData(); // Refetch all data to ensure UI is up-to-date
+  }
+
+  if (loading || !user) {
+    return (
+        <Container className="py-12">
+            <div className="grid md:grid-cols-2 gap-8">
+                <Skeleton className="h-96 w-full" />
+                <Skeleton className="h-96 w-full" />
+            </div>
+        </Container>
+    )
   }
 
   return (
