@@ -8,6 +8,8 @@ type User = {
   email: string;
 };
 
+type UserWithPassword = User & { password?: string };
+
 type SentRequests = {
   callback: { experienceId: number; email: string; }[];
   message: { experienceId: number; email: string; }[];
@@ -19,6 +21,7 @@ type AuthContextType = {
   login: (email: string, pass: string) => void;
   logout: () => void;
   signup: (name: string, email: string, pass: string) => void;
+  updateUser: (currentEmail: string, updates: Partial<UserWithPassword>) => void;
   hasSentRequest: (type: 'callback' | 'message', experienceId: number) => boolean;
   addSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
   removeSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
@@ -57,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (email: string, pass: string) => {
-    const storedUsers = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
     const foundUser = storedUsers.find((u: any) => u.email === email && u.password === pass);
 
     if (foundUser) {
@@ -84,6 +87,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { password, ...userToStore } = newUser;
     setUser(userToStore);
     localStorage.setItem('bookit_user', JSON.stringify(userToStore));
+  };
+
+  const updateUser = (currentEmail: string, updates: Partial<UserWithPassword>) => {
+    const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    
+    // Check if new email is already taken by another user
+    if (updates.email && updates.email !== currentEmail) {
+        const existingUser = storedUsers.find(u => u.email === updates.email);
+        if (existingUser) {
+            throw new Error('This email address is already in use.');
+        }
+    }
+
+    const userIndex = storedUsers.findIndex(u => u.email === currentEmail);
+
+    if (userIndex > -1) {
+        // Update user in the full list
+        const updatedUser = { ...storedUsers[userIndex], ...updates };
+        storedUsers[userIndex] = updatedUser;
+        localStorage.setItem('bookit_users', JSON.stringify(storedUsers));
+        
+        // Update the current session user
+        const { password, ...userToStore } = updatedUser;
+        setUser(userToStore);
+        localStorage.setItem('bookit_user', JSON.stringify(userToStore));
+
+        // If email was changed, we need to update sent requests as well
+        if (updates.email && updates.email !== currentEmail) {
+          setSentRequests(prev => {
+            const newRequests: SentRequests = JSON.parse(JSON.stringify(prev)); // deep copy
+            newRequests.callback.forEach(req => {
+              if (req.email === currentEmail) req.email = updates.email!;
+            });
+            newRequests.message.forEach(req => {
+              if (req.email === currentEmail) req.email = updates.email!;
+            });
+            localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
+            return newRequests;
+          });
+        }
+    } else {
+        throw new Error('Could not find user to update.');
+    }
   };
 
   const logout = () => {
@@ -119,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, sentRequests]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, hasSentRequest, addSentRequest, removeSentRequest }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser, hasSentRequest, addSentRequest, removeSentRequest }}>
       {children}
     </AuthContext.Provider>
   );
