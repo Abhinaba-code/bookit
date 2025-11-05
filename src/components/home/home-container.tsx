@@ -15,6 +15,8 @@ export function HomeContainer({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const [durationRange, setDurationRange] = useState<[number, number]>([1, 30]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +32,14 @@ export function HomeContainer({
     );
   };
 
+  const handlePriceChange = (value: number[]) => {
+    setPriceRange(value as [number, number]);
+  };
+  
+  const handleDurationChange = (value: number[]) => {
+    setDurationRange(value as [number, number]);
+  };
+
   const filteredExperiences = experiences.filter((experience) => {
     const searchMatch = experience.title.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -37,7 +47,13 @@ export function HomeContainer({
         selectedCategories.length === 0 || 
         selectedCategories.some(category => experience.tags?.includes(category));
 
-    return searchMatch && categoryMatch;
+    const priceMatch = experience.price >= priceRange[0] && experience.price <= priceRange[1];
+
+    // Duration in the data is in minutes. We convert days from the slider to minutes.
+    const durationInDays = experience.durationMins / (60 * 24);
+    const durationMatch = durationInDays >= durationRange[0] && durationInDays <= durationRange[1];
+
+    return searchMatch && categoryMatch && priceMatch && durationMatch;
   });
 
   return (
@@ -45,6 +61,10 @@ export function HomeContainer({
         <Sidebar 
             selectedCategories={selectedCategories}
             onCategoryChange={handleCategoryChange}
+            priceRange={priceRange}
+            onPriceChange={handlePriceChange}
+            durationRange={durationRange}
+            onDurationChange={handleDurationChange}
         />
         <main>
           <div className="mb-4">

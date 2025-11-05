@@ -38,9 +38,20 @@ const worldTours = [
 type SidebarProps = {
     selectedCategories: string[];
     onCategoryChange: (categoryId: string, checked: boolean) => void;
+    priceRange: [number, number];
+    onPriceChange: (value: number[]) => void;
+    durationRange: [number, number];
+    onDurationChange: (value: number[]) => void;
 }
 
-export function Sidebar({ selectedCategories, onCategoryChange }: SidebarProps) {
+export function Sidebar({ 
+    selectedCategories, 
+    onCategoryChange,
+    priceRange,
+    onPriceChange,
+    durationRange,
+    onDurationChange
+}: SidebarProps) {
 
   const handleCheckboxChange = (id: string) => (checked: boolean | 'indeterminate') => {
       if (typeof checked === 'boolean') {
@@ -53,24 +64,34 @@ export function Sidebar({ selectedCategories, onCategoryChange }: SidebarProps) 
         <h2 className="text-lg font-semibold font-headline mb-4">Sort & Filter</h2>
         <Card>
             <CardContent className="p-0">
-            <Accordion type="multiple" defaultValue={["price", "categories", "indianTours", "worldTours"]} className="w-full">
+            <Accordion type="multiple" defaultValue={["price", "categories", "indianTours", "worldTours", "duration"]} className="w-full">
                 <AccordionItem value="duration" className="p-4">
                     <AccordionTrigger className="font-semibold py-0">Duration</AccordionTrigger>
                     <AccordionContent className="pt-4 space-y-4">
-                        <Slider defaultValue={[7, 14]} max={30} step={1} />
+                        <Slider 
+                            value={durationRange} 
+                            onValueChange={onDurationChange} 
+                            max={30} 
+                            step={1} 
+                        />
                         <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>min. 7 days</span>
-                        <span>max. 14 days</span>
+                        <span>{durationRange[0]} days</span>
+                        <span>{durationRange[1]} days</span>
                         </div>
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="price" className="p-4">
                 <AccordionTrigger className="font-semibold py-0">Price</AccordionTrigger>
                 <AccordionContent className="pt-4 space-y-4">
-                    <Slider defaultValue={[3000, 7000]} max={10000} step={100} />
+                    <Slider 
+                        value={priceRange} 
+                        onValueChange={onPriceChange} 
+                        max={100000} 
+                        step={1000} 
+                    />
                     <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>₹3000</span>
-                    <span>₹7000</span>
+                    <span>₹{priceRange[0]}</span>
+                    <span>₹{priceRange[1]}</span>
                     </div>
                 </AccordionContent>
                 </AccordionItem>
