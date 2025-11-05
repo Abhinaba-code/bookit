@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Calendar, Check, Eye, Ticket, Phone, MessageSquare } from "lucide-react";
 import { RequestCallbackDialog } from "./request-callback-dialog";
+import { MessageRequestDialog } from "./message-request-dialog";
 
 const getDurationInNightsAndDays = (durationInMinutes: number): string => {
     const days = Math.ceil(durationInMinutes / (60 * 24));
@@ -92,9 +93,11 @@ export function ExperienceCard({
                         <Phone className="mr-2 h-4 w-4" /> Request Callback
                     </Button>
                 </RequestCallbackDialog>
-                <Button variant="outline" className="w-full">
-                    <MessageSquare className="mr-2 h-4 w-4" /> Message Request
-                </Button>
+                <MessageRequestDialog experience={experience}>
+                    <Button variant="outline" className="w-full">
+                        <MessageSquare className="mr-2 h-4 w-4" /> Message Request
+                    </Button>
+                </MessageRequestDialog>
             </div>
         </div>
     </Card>
