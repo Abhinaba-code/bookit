@@ -31,8 +31,8 @@ export function ExperienceCard({
 }) {
   const { user, hasSentRequest, addSentRequest } = useAuth();
 
-  const callbackSent = hasSentRequest('callback', experience.id);
-  const detailsRequested = hasSentRequest('message', experience.id);
+  const callbackSent = user ? hasSentRequest('callback', experience.id) : false;
+  const detailsRequested = user ? hasSentRequest('message', experience.id) : false;
 
   const duration = experience.durationMins ? getDurationInNightsAndDays(experience.durationMins) : null;
   
@@ -156,3 +156,5 @@ export function ExperienceCard({
     </Card>
   );
 }
+
+    

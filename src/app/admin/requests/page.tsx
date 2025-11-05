@@ -34,24 +34,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 type EnrichedCallbackRequest = CallbackRequest & { experienceTitle?: string };
 type EnrichedMessageRequest = MessageRequest & { experienceTitle?: string };
 
+// This function runs on the server and cannot be used directly with client-side data.
+// We will simplify for now and add enrichment back carefully later if needed.
 async function enrichRequests<T extends CallbackRequest | MessageRequest>(requests: T[]): Promise<(T & { experienceTitle?: string })[]> {
     const enriched = await Promise.all(
         requests.map(async (req) => {
             if (!req.experienceId) return { ...req, experienceTitle: 'N/A' };
             try {
+                // This is a server action, which was causing the issue.
+                // We are temporarily replacing it with the ID.
                 const experience = await getExperienceById(req.experienceId);
-                return { ...req, experienceTitle: experience?.title || "Unknown Experience" };
+                return { ...req, experienceTitle: experience?.title || `ID: ${req.experienceId}` };
             } catch (error) {
                 console.error(`Failed to fetch experience for request ${req.id}:`, error);
-                return { ...req, experienceTitle: 'Experience not found' };
+                return { ...req, experienceTitle: `ID: ${req.experienceId}` };
             }
         })
     );
     return enriched;
 }
 
+
 export default function AdminRequestsPage() {
-  const { user, loading, removeSentRequest } = useAuth();
+  const { user, loading, addSentRequest } = useAuth();
   const router = useRouter();
   const [callbackRequests, setCallbackRequests] = useState<EnrichedCallbackRequest[]>([]);
   const [messageRequests, setMessageRequests] = useState<EnrichedMessageRequest[]>([]);
@@ -65,10 +70,10 @@ export default function AdminRequestsPage() {
     const callbackReqs = getStoredCallbackRequests();
     const messageReqs = getStoredMessageRequests();
     
-    const [enrichedCallbacks, enrichedMessages] = await Promise.all([
-        enrichRequests(callbackReqs),
-        enrichRequests(messageReqs)
-    ]);
+    // We remove the problematic enrichment for now to get the page working.
+    // The title will just show the ID.
+    const enrichedCallbacks = callbackReqs.map(r => ({...r, experienceTitle: `ID: ${r.experienceId}`}));
+    const enrichedMessages = messageReqs.map(r => ({...r, experienceTitle: `ID: ${r.experienceId}`}));
 
     setCallbackRequests(enrichedCallbacks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     setMessageRequests(enrichedMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
@@ -88,8 +93,7 @@ export default function AdminRequestsPage() {
     startDeleteTransition(async () => {
         const result = await deleteCallbackRequest(req.id);
         if (result.success) {
-            setCallbackRequests(prev => prev.filter(r => r.id !== req.id));
-            if (user?.email) removeSentRequest('callback', req.experienceId, user.email);
+            fetchAndSetData(); // Refetch after deleting
             toast({ title: "Success", description: "Callback request deleted." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -101,8 +105,7 @@ export default function AdminRequestsPage() {
     startDeleteTransition(async () => {
         const result = await deleteMessageRequest(req.id);
         if (result.success) {
-            setMessageRequests(prev => prev.filter(r => r.id !== req.id));
-            if (user?.email) removeSentRequest('message', req.experienceId, user.email);
+            fetchAndSetData(); // Refetch after deleting
             toast({ title: "Success", description: "Message request deleted." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -152,7 +155,7 @@ export default function AdminRequestsPage() {
                             <Card key={req.id}>
                                 <CardHeader>
                                     <CardTitle className="text-lg">{req.name}</CardTitle>
-                                    <CardDescription>{req.experienceTitle || `Experience ID: ${req.experienceId}`}</CardDescription>
+                                    <CardDescription>{req.experienceTitle}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-2 text-sm">
                                     <p><strong>Email:</strong> {req.email}</p>
@@ -206,7 +209,7 @@ export default function AdminRequestsPage() {
                             <Card key={req.id}>
                                 <CardHeader>
                                     <CardTitle className="text-lg">{req.name}</CardTitle>
-                                    <CardDescription>{req.experienceTitle || `Experience ID: ${req.experienceId}`}</CardDescription>
+                                    <CardDescription>{req.experienceTitle}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-2 text-sm">
                                     <p><strong>Email:</strong> {req.email}</p>
