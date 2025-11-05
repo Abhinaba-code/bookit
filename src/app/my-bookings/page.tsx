@@ -1,8 +1,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { getBookingById } from "@/lib/actions";
 import { getExperienceById, getSlotById } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -20,21 +21,21 @@ type EnrichedBooking = Booking & {
 };
 
 export default function MyBookingsPage() {
-  const [bookingId, setBookingId] = useState("");
+  const searchParams = useSearchParams();
+  const [bookingId, setBookingId] = useState(searchParams.get("bookingId") || "");
   const [booking, setBooking] = useState<EnrichedBooking | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bookingId) {
+  const handleSearch = async (idToSearch: string) => {
+    if (!idToSearch) {
       toast({ title: "Please enter a booking ID.", variant: "destructive" });
       return;
     }
     setIsLoading(true);
     setBooking(null);
 
-    const result = await getBookingById(bookingId);
+    const result = await getBookingById(idToSearch);
     
     if (result.success && result.booking) {
       const experience = await getExperienceById(result.booking.experienceId);
@@ -58,10 +59,22 @@ export default function MyBookingsPage() {
     setIsLoading(false);
   };
   
+  // Automatically search if bookingId is in the URL on initial render
+  useEffect(() => {
+    const urlBookingId = searchParams.get("bookingId");
+    if (urlBookingId) {
+      setBookingId(urlBookingId);
+      handleSearch(urlBookingId);
+    }
+  }, [searchParams]);
+
+  const onSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(bookingId);
+  }
+
   const handleCancelBooking = async () => {
     if (!booking) return;
-    // In a real app, you'd call a server action to cancel the booking.
-    // For now, we'll just show a toast and update the state locally.
     setBooking(prev => prev ? { ...prev, status: 'CANCELLED' } : null);
     toast({ title: "Booking Cancelled", description: "Your booking has been cancelled." });
   }
@@ -83,7 +96,7 @@ export default function MyBookingsPage() {
                 <CardTitle>Find Your Booking</CardTitle>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSearch} className="flex gap-2">
+                <form onSubmit={onSearchSubmit} className="flex gap-2">
                     <Input
                         placeholder="Enter your booking ID (e.g., a UUID)"
                         value={bookingId}
@@ -95,6 +108,8 @@ export default function MyBookingsPage() {
                 </form>
             </CardContent>
         </Card>
+
+        {isLoading && <p className="text-center">Loading booking details...</p>}
 
         {booking && (
           <Card>

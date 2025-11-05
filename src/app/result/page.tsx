@@ -1,15 +1,17 @@
+
 "use client";
 
 import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { CheckCircle, XCircle } from "lucide-react";
 import { Container } from "@/components/ui/container";
 
 function ResultContent() {
   const searchParams = useSearchParams();
+  const bookingId = searchParams.get("bookingId");
   const code = searchParams.get("code");
   const total = searchParams.get("total");
   const success = !!code;
@@ -45,10 +47,15 @@ function ResultContent() {
             </p>
           )}
         </CardContent>
-        <CardFooter>
-            <Button asChild className="w-full">
+        <CardFooter className="flex-col sm:flex-row gap-2">
+            <Button asChild className="w-full" variant="outline">
                 <Link href="/">Back to Home</Link>
             </Button>
+            {success && bookingId && (
+                 <Button asChild className="w-full">
+                    <Link href={`/my-bookings?bookingId=${bookingId}`}>View My Booking</Link>
+                </Button>
+            )}
         </CardFooter>
       </Card>
     </Container>
