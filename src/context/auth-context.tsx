@@ -203,8 +203,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasSentRequest = useCallback((type: 'callback' | 'message', experienceId: number): boolean => {
     if (!user) return false;
+    // This check should be based on the local state which is loaded from localStorage.
     return sentRequests[type].some(req => req.experienceId === experienceId && req.email === user.email);
   }, [user, sentRequests]);
+
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser, hasSentRequest, addSentRequest, removeSentRequest, addBalance, deductBalance }}>

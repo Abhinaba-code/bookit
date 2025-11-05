@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useTransition, useCallback } from "react";
+import { useState, useEffect, useTransition } from "react";
 import {
   getAllCallbackRequests,
   getAllMessageRequests,
@@ -60,7 +60,7 @@ export default function AdminRequestsPage() {
   const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
 
-  const fetchAndSetData = useCallback(async () => {
+  const fetchAndSetData = async () => {
     setIsLoading(true);
     const [callbackRes, messageRes] = await Promise.all([
       getAllCallbackRequests(),
@@ -76,7 +76,7 @@ export default function AdminRequestsPage() {
       setMessageRequests(enriched);
     }
     setIsLoading(false);
-  }, []);
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -84,7 +84,7 @@ export default function AdminRequestsPage() {
     } else if (user) {
       fetchAndSetData();
     }
-  }, [user, loading, router, fetchAndSetData]);
+  }, [user, loading, router]);
   
   const handleDeleteCallback = (req: CallbackRequest) => {
     startDeleteTransition(async () => {

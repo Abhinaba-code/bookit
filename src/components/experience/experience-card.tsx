@@ -100,50 +100,55 @@ export function ExperienceCard({
                             <Ticket className="mr-2 h-4 w-4" /> Book Online
                         </Link>
                     </Button>
-                    {callbackSent ? (
-                      <TooltipProvider>
+                    <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div>
-                              <Button variant="outline" className="w-full" disabled>
-                                <Phone className="mr-2 h-4 w-4" /> Callback Sent
-                              </Button>
+                            <div className="w-full">
+                                {callbackSent ? (
+                                    <Button variant="outline" className="w-full" disabled>
+                                        <Phone className="mr-2 h-4 w-4" /> Callback Sent
+                                    </Button>
+                                ) : (
+                                    <RequestCallbackDialog experience={experience} onSuccess={(userEmail) => addSentRequest('callback', experience.id, userEmail)}>
+                                        <Button variant="outline" className="w-full">
+                                            <Phone className="mr-2 h-4 w-4" /> Request Callback
+                                        </Button>
+                                    </RequestCallbackDialog>
+                                )}
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent>
-                            <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
-                          </TooltipContent>
+                          {callbackSent && (
+                            <TooltipContent>
+                                <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
+                            </TooltipContent>
+                          )}
                         </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <RequestCallbackDialog experience={experience} onSuccess={(userEmail) => addSentRequest('callback', experience.id, userEmail)}>
-                          <Button variant="outline" className="w-full">
-                              <Phone className="mr-2 h-4 w-4" /> Request Callback
-                          </Button>
-                      </RequestCallbackDialog>
-                    )}
-                    {detailsRequested ? (
-                      <TooltipProvider>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div>
-                                <Button variant="outline" className="w-full" disabled>
-                                <MessageSquare className="mr-2 h-4 w-4" /> Details Requested
-                                </Button>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                             <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
-                          </TooltipContent>
+                            <TooltipTrigger asChild>
+                                <div className="w-full">
+                                    {detailsRequested ? (
+                                    <Button variant="outline" className="w-full" disabled>
+                                        <MessageSquare className="mr-2 h-4 w-4" /> Details Requested
+                                    </Button>
+                                    ) : (
+                                    <MessageRequestDialog experience={experience} onSuccess={(userEmail) => addSentRequest('message', experience.id, userEmail)}>
+                                        <Button variant="outline" className="w-full">
+                                            <MessageSquare className="mr-2 h-4 w-4" /> Message Request
+                                        </Button>
+                                    </MessageRequestDialog>
+                                    )}
+                                </div>
+                            </TooltipTrigger>
+                            {detailsRequested && (
+                                <TooltipContent>
+                                    <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
+                                </TooltipContent>
+                            )}
                         </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <MessageRequestDialog experience={experience} onSuccess={(userEmail) => addSentRequest('message', experience.id, userEmail)}>
-                          <Button variant="outline" className="w-full">
-                              <MessageSquare className="mr-2 h-4 w-4" /> Message Request
-                          </Button>
-                      </MessageRequestDialog>
-                    )}
+                    </TooltipProvider>
                   </>
                 )}
             </div>
