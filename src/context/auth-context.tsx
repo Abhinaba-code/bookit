@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('bookit_user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
+      setUser({ ...parsedUser, balance: Number(parsedUser.balance) || 0 });
     }
     setSentRequests(getInitialSentRequests()); // Always load from one source of truth
     setLoading(false);
@@ -155,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // Update the current session user
     const { password, ...userToStore } = updatedUser;
-    setUser(userToStore);
+    setUser({ ...userToStore, balance: Number(userToStore.balance) || 0});
     localStorage.setItem('bookit_user', JSON.stringify(userToStore));
 
     // If email was changed, we need to update sent requests as well
