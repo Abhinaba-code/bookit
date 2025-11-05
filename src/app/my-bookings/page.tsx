@@ -120,13 +120,11 @@ export default function MyBookingsPage() {
 
   const handleCancelBooking = (bookingId: string) => {
     const allBookings = getStoredBookings();
-    const updatedBookings = allBookings.map(b => 
-      b.id === bookingId ? { ...b, status: 'CANCELLED' as const } : b
-    );
+    const updatedBookings = allBookings.filter(b => b.id !== bookingId);
     saveStoredBookings(updatedBookings);
     // Re-fetch to update the UI state correctly
     fetchBookings();
-    toast({ title: "Booking Cancelled", description: "Your booking has been cancelled." });
+    toast({ title: "Booking Cancelled", description: "Your booking has been successfully cancelled and removed." });
   }
 
   if (loading || !user) {
@@ -179,5 +177,3 @@ export default function MyBookingsPage() {
     </Container>
   );
 }
-
-    
