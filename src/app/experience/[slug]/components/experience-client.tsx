@@ -8,7 +8,7 @@ import type { ExperienceDetail, Slot as SlotType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, MapPin, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export function ExperienceClient({
@@ -27,7 +27,7 @@ export function ExperienceClient({
   };
   
   const groupedSlots = experience.slots.reduce((acc, slot) => {
-    const date = format(new Date(slot.startsAt), 'eeee, MMM d');
+    const date = format(parseISO(slot.startsAt), 'eeee, MMM d');
     if (!acc[date]) {
       acc[date] = [];
     }
@@ -107,7 +107,7 @@ export function ExperienceClient({
                                             : "hover:border-primary/80 hover:bg-primary/5"
                                         )}
                                         >
-                                        <div className="font-semibold">{format(new Date(slot.startsAt), "h:mm a")}</div>
+                                        <div className="font-semibold">{format(parseISO(slot.startsAt), "h:mm a")}</div>
                                         <div className="text-xs text-muted-foreground">
                                             {disabled ? "Sold Out" : `${slot.remaining} left`}
                                         </div>

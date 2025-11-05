@@ -3,13 +3,15 @@ import { PlaceHolderImages } from "./placeholder-images";
 
 const addDays = (days: number) => {
   const date = new Date();
-  date.setDate(date.getDate() + days);
+  // Set time to noon UTC to avoid timezone issues during rendering
+  date.setUTCHours(12, 0, 0, 0);
+  date.setUTCDate(date.getUTCDate() + days);
   return date;
 };
 
 const addHrs = (date: Date, h: number) => {
   const newDate = new Date(date);
-  newDate.setHours(newDate.getHours() + h);
+  newDate.setUTCHours(newDate.getUTCHours() + h);
   return newDate;
 };
 
@@ -415,17 +417,23 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
 
 const generatedSlots: Slot[] = [];
 experiencesData.forEach(exp => {
-    const remainingSeatsOptions = [0, 10, 4, 15, 0];
+    const remainingSeatsOptions = [0, 10, 4, 15, 8];
     for (let i = 1; i <= 5; i++) {
         const capacity = 15;
-        const remaining = remainingSeatsOptions[i-1];
+        const remaining = remainingSeatsOptions[i-1 % remainingSeatsOptions.length];
+        const startsAtDate = addDays(i * 5);
+        
+        // Alternate between morning and afternoon slots
+        const startHour = i % 2 === 0 ? 9 : 14; 
+        startsAtDate.setUTCHours(startHour, 0, 0, 0);
+
         generatedSlots.push({
-        id: generatedSlots.length + 1,
-        experienceId: exp.id,
-        startsAt: addHrs(addDays(i * 5), Math.random() > 0.5 ? 9 : 14).toISOString(),
-        capacity: capacity,
-        remaining: remaining,
-        isSoldOut: remaining === 0,
+            id: generatedSlots.length + 1,
+            experienceId: exp.id,
+            startsAt: startsAtDate.toISOString(),
+            capacity: capacity,
+            remaining: remaining,
+            isSoldOut: remaining === 0,
         });
     }
 });
