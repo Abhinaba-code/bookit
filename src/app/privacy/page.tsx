@@ -40,7 +40,7 @@ export default function PrivacyPage() {
         <p>
           For any questions about this privacy policy, please contact us at <a href="mailto:abhinabapradhan@gmail.com">abhinabapradhan@gmail.com</a>.
         </p>
-        <p className="text-sm text-muted-foreground mt-8">Last updated: {new Date().toLocaleDateString()}</p>
+        <p className="text-sm text-muted-foreground mt-8">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
     </Container>
   );

@@ -40,7 +40,7 @@ export default function TermsPage() {
         <p>
           For any questions regarding these terms, please contact us at <a href="mailto:abhinabapradhan@gmail.com">abhinabapradhan@gmail.com</a>. These terms are governed by the laws of India.
         </p>
-        <p className="text-sm text-muted-foreground mt-8">Last updated: {new Date().toLocaleDateString()}</p>
+        <p className="text-sm text-muted-foreground mt-8">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
     </Container>
   );
