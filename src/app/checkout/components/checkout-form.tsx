@@ -123,22 +123,13 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
   });
 
   useEffect(() => {
-    // Wait until we have the necessary URL parameters before loading data.
+    // This effect should only run when the necessary params are available.
+    // Suspense on the parent page ensures this component doesn't render until they are.
     if (!bookingId && !experienceId) {
-        // If we are in the browser and still don't have the params, it's an error.
-        if (typeof window !== 'undefined') {
-            const timer = setTimeout(() => {
-                // Check again after a short delay in case of slow hydration
-                 if (!searchParams.bookingId && !searchParams.experienceId) {
-                    toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
-                    router.push('/dashboard');
-                 }
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-        return;
+      toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
+      router.push('/dashboard');
+      return;
     }
-
 
     async function loadData() {
         setIsLoading(true);
@@ -205,7 +196,7 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
         }
     }
     loadData();
-  }, [bookingId, experienceId, slotId, form, router, toast, searchParams]);
+  }, [bookingId, experienceId, slotId, form, router, toast]);
 
 
   const adults = form.watch("adults");

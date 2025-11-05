@@ -27,7 +27,6 @@ function CheckoutSkeleton() {
 }
 
 export default function CheckoutPage({ searchParams }: Props) {
-  // All logic is now moved to the client component to safely access sessionStorage
   return (
     <Container className="py-12">
       <div className="max-w-6xl mx-auto">
@@ -46,3 +45,5 @@ export default function CheckoutPage({ searchParams }: Props) {
     </Container>
   );
 }
+
+    
