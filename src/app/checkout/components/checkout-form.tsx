@@ -168,9 +168,9 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
                 form.reset({
                     id: bookingToEdit.id,
                     slotId: bookingToEdit.slotId,
-                    adults: bookingToEdit.numGuests, // Simplified; needs guest breakdown
-                    children: 0,
-                    infants: 0,
+                    adults: bookingToEdit.adults ?? bookingToEdit.numGuests, // Use specific guest counts if available
+                    children: bookingToEdit.children ?? 0,
+                    infants: bookingToEdit.infants ?? 0,
                     title: title,
                     firstName: firstName,
                     lastName: lastName,
@@ -266,6 +266,9 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
         total,
         subtotal,
         discount,
+        adults: values.adults,
+        children: values.children,
+        infants: values.infants,
       };
       
       const result = await createBooking(bookingData);
@@ -508,3 +511,5 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
     </Form>
   );
 }
+
+    

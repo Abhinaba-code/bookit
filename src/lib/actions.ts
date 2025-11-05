@@ -21,6 +21,9 @@ const bookingSchema = z.object({
   discount: z.coerce.number(),
   dob: z.date({ required_error: "Date of birth is required." }),
   gender: z.enum(["male", "female"]),
+  adults: z.coerce.number().int().min(0),
+  children: z.coerce.number().int().min(0),
+  infants: z.coerce.number().int().min(0),
 });
 
 export async function createBooking(data: unknown) {
@@ -227,5 +230,7 @@ export async function updateMessageRequest(data: unknown) {
     revalidatePath('/admin/requests');
     return { success: true, request: validation.data };
 }
+
+    
 
     

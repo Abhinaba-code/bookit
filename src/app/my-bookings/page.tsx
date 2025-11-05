@@ -23,6 +23,8 @@ type EnrichedBooking = Booking & {
 
 function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel: (bookingId: string) => void }) {
     const isCancelled = booking.status === 'CANCELLED';
+    const guestDetails = `Adults: ${booking.adults ?? 'N/A'}, Children: ${booking.children ?? 'N/A'}, Infants: ${booking.infants ?? 'N/A'}`;
+
     return (
         <Card>
             <CardHeader>
@@ -43,8 +45,8 @@ function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel
                     <p className="text-muted-foreground">{booking.email} | {booking.phone}</p>
                 </div>
                 <div>
-                    <h3 className="font-semibold">Guests</h3>
-                    <p className="text-muted-foreground">{booking.numGuests}</p>
+                    <h3 className="font-semibold">Guests ({booking.numGuests})</h3>
+                    <p className="text-muted-foreground">{guestDetails}</p>
                 </div>
                  <div>
                     <h3 className="font-semibold">Total Paid</h3>
@@ -130,8 +132,10 @@ export default function MyBookingsPage() {
     // Refund the amount
     addBalance(bookingToCancel.total);
     
-    // Remove the booking from storage
-    const updatedBookings = allBookings.filter(b => b.id !== bookingId);
+    // Instead of removing, we update the status to CANCELLED
+    const updatedBookings = allBookings.map(b => 
+        b.id === bookingId ? { ...b, status: 'CANCELLED' } : b
+    );
     saveStoredBookings(updatedBookings);
 
     // Re-fetch to update the UI state correctly
@@ -193,3 +197,5 @@ export default function MyBookingsPage() {
     </Container>
   );
 }
+
+    

@@ -36,6 +36,11 @@ export type Booking = {
   email: string;
   phone?: string;
   numGuests: number;
+  adults?: number;
+  children?: number;
+  infants?: number;
+  dob: string;
+  gender: "male" | "female";
   promoCode?: string;
   subtotal: number;
   discount: number;
@@ -69,3 +74,5 @@ export type MessageRequest = {
   createdAt: string;
   status: "PENDING" | "SENT" | "CLOSED";
 };
+
+    
