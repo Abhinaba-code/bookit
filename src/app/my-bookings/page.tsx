@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { getAllBookings } from "@/lib/actions";
+import { getStoredBookings, saveStoredBookings } from "@/lib/data";
 import { getExperienceById, getSlotById } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -81,43 +81,51 @@ export default function MyBookingsPage() {
   }, [user, loading, router]);
 
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!user) return;
-      setIsLoading(true);
-      const result = await getAllBookings();
-      
-      if (result.success && result.bookings) {
-        const userBookings = result.bookings.filter(b => b.email === user.email);
+  const fetchBookings = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    
+    try {
+      const allBookings = getStoredBookings();
+      const userBookings = allBookings.filter(b => b.email === user.email);
 
-        const enrichedBookings = await Promise.all(
-          userBookings.map(async (booking) => {
-            const experience = await getExperienceById(booking.experienceId);
-            const slot = await getSlotById(booking.slotId);
-            return {
-              ...booking,
-              experienceTitle: experience?.title || "Unknown Experience",
-              experienceSlug: experience?.slug || "",
-              slotDate: slot?.startsAt || new Date().toISOString(),
-            };
-          })
-        );
-        // sort by most recent
-        enrichedBookings.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setBookings(enrichedBookings);
-      } else {
-        toast({ title: "Error", description: "Could not fetch bookings.", variant: "destructive" });
-      }
-      setIsLoading(false);
-    };
-
-    if(user) {
-        fetchBookings();
+      const enrichedBookings = await Promise.all(
+        userBookings.map(async (booking) => {
+          const experience = await getExperienceById(booking.experienceId);
+          const slot = await getSlotById(booking.slotId);
+          return {
+            ...booking,
+            experienceTitle: experience?.title || "Unknown Experience",
+            experienceSlug: experience?.slug || "",
+            slotDate: slot?.startsAt || new Date().toISOString(),
+          };
+        })
+      );
+      // sort by most recent
+      enrichedBookings.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setBookings(enrichedBookings);
+    } catch (error) {
+      console.error("Failed to fetch or enrich bookings:", error);
+      toast({ title: "Error", description: "Could not fetch bookings.", variant: "destructive" });
     }
-  }, [toast, user]);
+    
+    setIsLoading(false);
+  }, [user, toast]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBookings();
+    }
+  }, [user, fetchBookings]);
 
   const handleCancelBooking = (bookingId: string) => {
-    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'CANCELLED' } : b));
+    const allBookings = getStoredBookings();
+    const updatedBookings = allBookings.map(b => 
+      b.id === bookingId ? { ...b, status: 'CANCELLED' as const } : b
+    );
+    saveStoredBookings(updatedBookings);
+    // Re-fetch to update the UI state correctly
+    fetchBookings();
     toast({ title: "Booking Cancelled", description: "Your booking has been cancelled." });
   }
 
@@ -171,3 +179,5 @@ export default function MyBookingsPage() {
     </Container>
   );
 }
+
+    

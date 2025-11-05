@@ -8,6 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validatePromoCode } from "@/ai/flows/validate-promo-code";
 import { createBooking } from "@/lib/actions";
+import { getStoredBookings, saveStoredBookings } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import type { ExperienceDetail, Slot } from "@/types";
 import { useAuth } from "@/context/auth-context";
@@ -183,11 +184,16 @@ export function CheckoutForm({
       
       const result = await createBooking(bookingData);
 
-      if (result.success) {
+      if (result.success && result.booking) {
         try {
             deductBalance(total);
+            
+            // Save booking to localStorage on the client
+            const existingBookings = getStoredBookings();
+            saveStoredBookings([...existingBookings, result.booking]);
+
             router.push(
-                `/result?bookingId=${result.bookingId}&code=${result.confirmationCode}&total=${result.total}`
+                `/result?bookingId=${result.booking.id}&code=${result.confirmationCode}&total=${result.total}`
             );
         } catch (e: any) {
             toast({
@@ -381,3 +387,5 @@ export function CheckoutForm({
     </Form>
   );
 }
+
+    

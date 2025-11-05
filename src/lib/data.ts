@@ -452,7 +452,22 @@ export const experiences: ExperienceDetail[] = experiencesData.map((exp, index) 
 
 export const slots: Slot[] = generatedSlots;
 
-export let bookings: Booking[] = [];
+// Use functions to get/set from localStorage to ensure it's only called on the client
+export function getStoredBookings(): Booking[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem('bookit_bookings');
+  return stored ? JSON.parse(stored) : [];
+}
+
+export function saveStoredBookings(bookings: Booking[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('bookit_bookings', JSON.stringify(bookings));
+}
+
+
 export let callbackRequests: CallbackRequest[] = [];
 export let messageRequests: MessageRequest[] = [];
+    
+
+
     

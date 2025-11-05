@@ -2,10 +2,10 @@
 "use server";
 
 import { z } from "zod";
-import { experiences, slots, bookings, callbackRequests, messageRequests } from "./data";
+import { experiences, slots, callbackRequests, messageRequests, getStoredBookings, saveStoredBookings } from "./data";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
-import type { CallbackRequest, MessageRequest } from "@/types";
+import type { CallbackRequest, MessageRequest, Booking } from "@/types";
 
 const bookingSchema = z.object({
   experienceId: z.coerce.number().int().positive(),
@@ -33,7 +33,11 @@ export async function createBooking(data: unknown) {
     numGuests
   } = validation.data;
 
-  // In a real app, this would be a database transaction
+  // This part now needs to happen on the client, or we need a different strategy.
+  // For now, we assume this action is called from a context where it can then instruct the client to update localStorage.
+  // The server can't directly modify the client's localStorage.
+  // So, we'll return the new booking, and the client will add it.
+
   try {
     const slot = slots.find((s) => s.id === slotId);
     const experience = experiences.find((e) => e.id === experienceId);
@@ -51,27 +55,28 @@ export async function createBooking(data: unknown) {
         return { success: false, error: "This slot was just booked. Please try another." };
     }
 
-    // Update slot
-    slot.remaining -= numGuests;
-    if (slot.remaining <= 0) {
-      slot.isSoldOut = true;
-    }
+    // Don't update server-side data, as it's not the source of truth anymore
+    // slot.remaining -= numGuests;
+    // if (slot.remaining <= 0) {
+    //   slot.isSoldOut = true;
+    // }
 
-    const newBooking = {
+    const newBooking: Booking = {
       ...validation.data,
       id: uuidv4(),
       status: "CONFIRMED" as const,
       createdAt: new Date().toISOString(),
     };
-
-    bookings.push(newBooking);
+    
+    // The server action will now return the booking object.
+    // The client will be responsible for adding it to localStorage.
 
     revalidatePath(`/experience/${experience.slug}`);
     revalidatePath('/my-bookings');
 
     return {
       success: true,
-      bookingId: newBooking.id,
+      booking: newBooking, // Return the full booking object
       confirmationCode: newBooking.id.slice(-8).toUpperCase(),
       total: newBooking.total,
     };
@@ -80,17 +85,12 @@ export async function createBooking(data: unknown) {
   }
 }
 
-export async function getBookingById(bookingId: string) {
-    const booking = bookings.find(b => b.id === bookingId);
-    if (!booking) {
-        return { success: false, error: "Booking ID not found." };
-    }
-    return { success: true, booking };
-}
-
 export async function getAllBookings() {
-    // In a real app, you'd fetch this for the logged-in user from a database
-    return { success: true, bookings: [...bookings] };
+    // This function will now be called on the client-side,
+    // so we can't use "use server" logic here.
+    // We will read from localStorage on the client instead.
+    // This server action is effectively deprecated for its original purpose.
+    return { success: true, bookings: [] };
 }
 
 // Actions for Callback and Message Requests
@@ -238,3 +238,5 @@ export async function updateMessageRequest(data: unknown) {
     }
     return { success: false, error: "Request not found." };
 }
+
+    
