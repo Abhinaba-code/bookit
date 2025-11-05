@@ -104,7 +104,7 @@ export function CheckoutForm({
   const adults = form.watch("adults");
   const children = form.watch("children");
   const infants = form.watch("infants");
-  const numGuests = adults + children + infants;
+  const numGuests = Number(adults) + Number(children) + Number(infants);
   const selectedSlotId = form.watch("slotId");
   const selectedSlot = experience.slots.find(s => s.id === selectedSlotId);
 
