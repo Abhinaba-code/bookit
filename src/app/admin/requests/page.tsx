@@ -60,37 +60,31 @@ export default function AdminRequestsPage() {
   const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
-
-
   const fetchAndSetData = useCallback(async () => {
-      setIsLoading(true);
-      // Since actions now read from localStorage, they are safe to call on the client.
-      const [callbackRes, messageRes] = await Promise.all([
-        getAllCallbackRequests(),
-        getAllMessageRequests(),
-      ]);
+    setIsLoading(true);
+    const [callbackRes, messageRes] = await Promise.all([
+      getAllCallbackRequests(),
+      getAllMessageRequests(),
+    ]);
 
-      if (callbackRes.success && callbackRes.requests) {
-        const enriched = await enrichRequests(callbackRes.requests);
-        setCallbackRequests(enriched);
-      }
-      if (messageRes.success && messageRes.requests) {
-        const enriched = await enrichRequests(messageRes.requests);
-        setMessageRequests(enriched);
-      }
-      setIsLoading(false);
+    if (callbackRes.success && callbackRes.requests) {
+      const enriched = await enrichRequests(callbackRes.requests);
+      setCallbackRequests(enriched);
+    }
+    if (messageRes.success && messageRes.requests) {
+      const enriched = await enrichRequests(messageRes.requests);
+      setMessageRequests(enriched);
+    }
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    if(user) {
-        fetchAndSetData();
+    if (!loading && !user) {
+      router.push("/login");
+    } else if (user) {
+      fetchAndSetData();
     }
-  }, [user, fetchAndSetData]);
+  }, [user, loading, router, fetchAndSetData]);
   
   const handleDeleteCallback = (req: CallbackRequest) => {
     startDeleteTransition(async () => {
@@ -148,7 +142,10 @@ export default function AdminRequestsPage() {
             <section>
                 <h2 className="text-2xl font-bold font-headline mb-4">Callback Requests</h2>
                 {isLoading ? (
-                    <p>Loading...</p>
+                    <div className="space-y-4">
+                        <Skeleton className="h-64 w-full" />
+                        <Skeleton className="h-64 w-full" />
+                    </div>
                 ) : callbackRequests.length === 0 ? (
                     <p className="text-muted-foreground">No callback requests found.</p>
                 ) : (
@@ -199,7 +196,10 @@ export default function AdminRequestsPage() {
             <section>
                 <h2 className="text-2xl font-bold font-headline mb-4">Message Requests</h2>
                 {isLoading ? (
-                    <p>Loading...</p>
+                     <div className="space-y-4">
+                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="h-48 w-full" />
+                    </div>
                 ) : messageRequests.length === 0 ? (
                     <p className="text-muted-foreground">No message requests found.</p>
                 ) : (
