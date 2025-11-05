@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Calendar, Check, Eye, Ticket, Phone, MessageSquare } from "lucide-react";
 import { RequestCallbackDialog } from "./request-callback-dialog";
 import { MessageRequestDialog } from "./message-request-dialog";
+import { useAuth } from "@/context/auth-context";
 
 const getDurationInNightsAndDays = (durationInMinutes: number): string => {
     const days = Math.ceil(durationInMinutes / (60 * 24));
@@ -28,6 +29,7 @@ export function ExperienceCard({
 }: {
   experience: ExperienceSummary;
 }) {
+  const { user } = useAuth();
   const [callbackSent, setCallbackSent] = useState(false);
   const [detailsRequested, setDetailsRequested] = useState(false);
   const duration = experience.durationMins ? getDurationInNightsAndDays(experience.durationMins) : null;
@@ -88,21 +90,25 @@ export function ExperienceCard({
                         <Eye className="mr-2 h-4 w-4" /> View Details
                     </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full">
-                     <Link href={`/checkout?experienceId=${experience.id}`}>
-                        <Ticket className="mr-2 h-4 w-4" /> Book Online
-                    </Link>
-                </Button>
-                <RequestCallbackDialog experience={experience} onSuccess={() => setCallbackSent(true)}>
-                    <Button variant="outline" className="w-full" disabled={callbackSent}>
-                        <Phone className="mr-2 h-4 w-4" /> {callbackSent ? 'Callback Sent' : 'Request Callback'}
+                {user && (
+                  <>
+                    <Button asChild variant="outline" className="w-full">
+                        <Link href={`/checkout?experienceId=${experience.id}`}>
+                            <Ticket className="mr-2 h-4 w-4" /> Book Online
+                        </Link>
                     </Button>
-                </RequestCallbackDialog>
-                <MessageRequestDialog experience={experience} onSuccess={() => setDetailsRequested(true)}>
-                    <Button variant="outline" className="w-full" disabled={detailsRequested}>
-                        <MessageSquare className="mr-2 h-4 w-4" /> {detailsRequested ? 'Details Requested' : 'Message Request'}
-                    </Button>
-                </MessageRequestDialog>
+                    <RequestCallbackDialog experience={experience} onSuccess={() => setCallbackSent(true)}>
+                        <Button variant="outline" className="w-full" disabled={callbackSent}>
+                            <Phone className="mr-2 h-4 w-4" /> {callbackSent ? 'Callback Sent' : 'Request Callback'}
+                        </Button>
+                    </RequestCallbackDialog>
+                    <MessageRequestDialog experience={experience} onSuccess={() => setDetailsRequested(true)}>
+                        <Button variant="outline" className="w-full" disabled={detailsRequested}>
+                            <MessageSquare className="mr-2 h-4 w-4" /> {detailsRequested ? 'Details Requested' : 'Message Request'}
+                        </Button>
+                    </MessageRequestDialog>
+                  </>
+                )}
             </div>
         </div>
     </Card>
