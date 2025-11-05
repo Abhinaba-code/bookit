@@ -177,40 +177,62 @@ export async function deleteMessageRequest(id: string) {
     return { success: false, error: "Request not found." };
 }
 
-const updateCallbackStatusSchema = z.object({
+const updateCallbackRequestSchema = z.object({
     id: z.string(),
+    name: z.string().min(1, "Your Name is required."),
+    email: z.string().email("Please enter a valid email address."),
+    phone: z.string().min(1, "Phone Number is required."),
+    city: z.string().min(1, "Current City is required."),
+    adults: z.coerce.number().int().min(1),
+    children: z.coerce.number().int().min(0),
+    infants: z.coerce.number().int().min(0),
+    dateOfTravel: z.date(),
+    query: z.string().min(10, "Please enter a query of at least 10 characters."),
     status: z.enum(["PENDING", "CONTACTED", "CLOSED"]),
 });
 
+
 export async function updateCallbackRequest(data: unknown) {
-    const validation = updateCallbackStatusSchema.safeParse(data);
+    const validation = updateCallbackRequestSchema.safeParse(data);
     if (!validation.success) {
+        console.log(validation.error.errors)
         return { success: false, error: "Invalid input." };
     }
-    const { id, status } = validation.data;
+    const { id, ...updateData } = validation.data;
     const index = callbackRequests.findIndex(r => r.id === id);
+
     if (index > -1) {
-        callbackRequests[index].status = status;
+        callbackRequests[index] = {
+            ...callbackRequests[index],
+            ...updateData,
+            dateOfTravel: updateData.dateOfTravel.toISOString(),
+        };
         revalidatePath('/admin/requests');
         return { success: true, request: callbackRequests[index] };
     }
     return { success: false, error: "Request not found." };
 }
 
-const updateMessageStatusSchema = z.object({
+const updateMessageRequestSchema = z.object({
     id: z.string(),
+    name: z.string().min(1, "Your Name is required."),
+    email: z.string().email("Please enter a valid email address."),
+    phone: z.string().min(1, "Phone Number is required."),
     status: z.enum(["PENDING", "SENT", "CLOSED"]),
 });
 
 export async function updateMessageRequest(data: unknown) {
-    const validation = updateMessageStatusSchema.safeParse(data);
+    const validation = updateMessageRequestSchema.safeParse(data);
     if (!validation.success) {
         return { success: false, error: "Invalid input." };
     }
-    const { id, status } = validation.data;
+    const { id, ...updateData } = validation.data;
     const index = messageRequests.findIndex(r => r.id === id);
     if (index > -1) {
-        messageRequests[index].status = status;
+         messageRequests[index] = {
+            ...messageRequests[index],
+            ...updateData,
+        };
         revalidatePath('/admin/requests');
         return { success: true, request: messageRequests[index] };
     }
