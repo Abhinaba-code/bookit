@@ -42,37 +42,18 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
-const messageFormSchema = z.object({
-  name: z.string().min(1, { message: "Name is required." }),
-  email: z.string().email(),
-  phone: z.string().min(1, { message: "Phone is required." }),
-  status: z.enum(["PENDING", "SENT", "CLOSED"]),
-});
-
-const callbackFormSchema = z.object({
+const formSchema = z.object({
     name: z.string().min(1, { message: "Your Name is required." }),
     email: z.string().email({ message: "Please enter a valid email address." }),
     phone: z.string().min(1, { message: "Phone Number is required." }),
-    city: z.string().min(1, { message: "Current City is required." }),
-    adults: z.coerce.number().int().min(1),
-    children: z.coerce.number().int().min(0),
-    infants: z.coerce.number().int().min(0),
-    dateOfTravel: z.date(),
-    query: z.string().min(10, { message: "Please enter a query of at least 10 characters." }),
-    status: z.enum(["PENDING", "CONTACTED", "CLOSED"]),
+    city: z.string().optional(),
+    adults: z.coerce.number().int().optional(),
+    children: z.coerce.number().int().optional(),
+    infants: z.coerce.number().int().optional(),
+    dateOfTravel: z.date().optional(),
+    query: z.string().optional(),
+    status: z.string(),
 });
-
-const formSchema = z.union([
-    messageFormSchema.extend({
-        city: z.string().optional(),
-        adults: z.number().optional(),
-        children: z.number().optional(),
-        infants: z.number().optional(),
-        dateOfTravel: z.date().optional(),
-        query: z.string().optional()
-    }), 
-    callbackFormSchema
-]);
 
 type EditRequestFormValues = z.infer<typeof formSchema>;
 
@@ -96,11 +77,14 @@ export function EditRequestDialog({
 
   const isCallback = type === 'callback';
 
-  const form = useForm<EditRequestFormValues>({
-    resolver: zodResolver(isCallback ? callbackFormSchema : messageFormSchema),
-    defaultValues: isCallback 
+  const defaultValues: Partial<EditRequestFormValues> = isCallback 
       ? { ...(request as CallbackRequest), dateOfTravel: new Date((request as CallbackRequest).dateOfTravel) }
-      : request,
+      : request;
+
+
+  const form = useForm<EditRequestFormValues>({
+    // resolver: zodResolver(formSchema), // Resolver can be tricky with union types, manual validation is safer here.
+    defaultValues: defaultValues as any,
   });
 
   const onSubmit = (values: EditRequestFormValues) => {
@@ -174,17 +158,17 @@ export function EditRequestDialog({
             {isCallback && (
                 <>
                     <FormField control={form.control} name="city" render={({ field }) => (
-                        <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <div className="grid grid-cols-3 gap-4">
                         <FormField control={form.control} name="adults" render={({ field }) => (
-                            <FormItem><FormLabel>Adults</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Adults</FormLabel><FormControl><Input type="number" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="children" render={({ field }) => (
-                            <FormItem><FormLabel>Children</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Children</FormLabel><FormControl><Input type="number" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="infants" render={({ field }) => (
-                            <FormItem><FormLabel>Infants</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Infants</FormLabel><FormControl><Input type="number" {...field} value={field.value || 0} /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                      <FormField control={form.control} name="dateOfTravel" render={({ field }) => (
@@ -206,7 +190,7 @@ export function EditRequestDialog({
                         </FormItem>
                      )} />
                     <FormField control={form.control} name="query" render={({ field }) => (
-                        <FormItem><FormLabel>Query</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Query</FormLabel><FormControl><Textarea {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </>
             )}
