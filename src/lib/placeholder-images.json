@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "Sunrise Hot Air Balloon Ride in Jaipur.",
+      "imageUrl": "https://images.unsplash.com/photo-1642700055585-341fb4949e9e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxiYWxsb29uJTIwcmlkZXxlbnwwfHx8fDE3NjIzMjQ0NzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "balloon ride"
+    },
+    {
+      "id": "2",
+      "description": "A thrilling scuba diving experience.",
+      "imageUrl": "https://images.unsplash.com/photo-1682687982502-1529b3b33f85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzY3ViYSUyMGRpdmluZ3xlbnwwfHx8fDE3NjIzMjMyODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "scuba diving"
+    },
+    {
+      "id": "3",
+      "description": "Explore the wild in a jungle safari.",
+      "imageUrl": "https://images.unsplash.com/photo-1656828059237-add66db82a2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxqdW5nbGUlMjBzYWZhcml8ZW58MHx8fHwxNzYyMzI0NDcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "jungle safari"
+    },
+    {
+      "id": "4",
+      "description": "Challenging mountain trekking with stunning views.",
+      "imageUrl": "https://images.unsplash.com/photo-1652516076966-ccebe7fcbf79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb3VudGFpbiUyMHRyZWt8ZW58MHx8fHwxNzYyMjczMDQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mountain trek"
+    },
+    {
+      "id": "5",
+      "description": "A relaxing day of kayaking on a serene lake.",
+      "imageUrl": "https://images.unsplash.com/photo-1600110800114-5f55bb1c0f53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxrYXlha2luZyUyMGxha2V8ZW58MHx8fHwxNzYyMjQwNzYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kayaking lake"
+    },
+    {
+      "id": "6",
+      "description": "Learn to cook local cuisine from expert chefs.",
+      "imageUrl": "https://images.unsplash.com/photo-1683624328172-88fb24625ec1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb29raW5nJTIwY2xhc3N8ZW58MHx8fHwxNzYyMjY4OTYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cooking class"
+    },
+    {
+      "id": "7",
+      "description": "A guided historical tour of ancient city ruins.",
+      "imageUrl": "https://images.unsplash.com/photo-1717518215550-df082a0924e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YW5jaWVudCUyMHJ1aW5zfGVufDB8fHx8MTc2MjMyMTcyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ancient ruins"
+    },
+    {
+      "id": "8",
+      "description": "Stargazing night with powerful telescopes.",
+      "imageUrl": "https://images.unsplash.com/photo-1681963709837-3be04f728255?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzdGFyZ2F6aW5nJTIwbmlnaHR8ZW58MHx8fHwxNzYyMzI0NDcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "stargazing night"
+    }
+  ]
 }
