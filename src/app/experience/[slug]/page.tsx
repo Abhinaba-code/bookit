@@ -1,4 +1,5 @@
 
+
 import { getExperienceBySlug } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { ExperienceClient } from "./components/experience-client";

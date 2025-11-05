@@ -89,7 +89,7 @@ export function ExperienceCard({
                     </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                     <Link href={`/experience/${experience.slug}`}>
+                     <Link href={`/checkout?experienceId=${experience.id}`}>
                         <Ticket className="mr-2 h-4 w-4" /> Book Online
                     </Link>
                 </Button>
