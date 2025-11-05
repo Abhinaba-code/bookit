@@ -7,7 +7,7 @@ export function ExperienceList({
   experiences: ExperienceSummary[];
 }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="space-y-4">
       {experiences.map((experience) => (
         <ExperienceCard key={experience.id} experience={experience} />
       ))}
