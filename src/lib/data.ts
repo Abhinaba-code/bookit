@@ -3,18 +3,11 @@ import { PlaceHolderImages } from "./placeholder-images";
 
 const addDays = (days: number) => {
   const date = new Date();
-  // Set time to noon UTC to avoid timezone issues during rendering
+  // Set time to a neutral point to avoid timezone issues during date-only rendering
   date.setUTCHours(12, 0, 0, 0);
   date.setUTCDate(date.getUTCDate() + days);
   return date;
 };
-
-const addHrs = (date: Date, h: number) => {
-  const newDate = new Date(date);
-  newDate.setUTCHours(newDate.getUTCHours() + h);
-  return newDate;
-};
-
 
 const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'>[] = [
   {
@@ -421,11 +414,19 @@ experiencesData.forEach(exp => {
     for (let i = 1; i <= 5; i++) {
         const capacity = 15;
         const remaining = remainingSeatsOptions[i-1 % remainingSeatsOptions.length];
-        const startsAtDate = addDays(i * 5);
         
-        // Alternate between morning and afternoon slots
-        const startHour = i % 2 === 0 ? 9 : 14; 
-        startsAtDate.setUTCHours(startHour, 0, 0, 0);
+        // Create the date in UTC
+        const year = new Date().getUTCFullYear();
+        const month = new Date().getUTCMonth();
+        const day = (i * 5) % 28; // Keep days within a reasonable range
+        const startHour = i % 2 === 0 ? 9 : 14; // 9 AM or 2 PM UTC
+
+        const startsAtDate = new Date(Date.UTC(year, month, day, startHour, 0, 0, 0));
+
+        // Ensure date is in the future
+        if (startsAtDate < new Date()) {
+            startsAtDate.setUTCFullYear(year + 1);
+        }
 
         generatedSlots.push({
             id: generatedSlots.length + 1,
@@ -451,3 +452,5 @@ export const experiences: ExperienceDetail[] = experiencesData.map((exp, index) 
 export const slots: Slot[] = generatedSlots;
 
 export let bookings: Booking[] = [];
+
+    
