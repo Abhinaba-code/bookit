@@ -8,10 +8,9 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { UserCircle2 } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -46,7 +45,10 @@ export default function ProfilePage() {
     <Container className="py-12 flex justify-center">
       <Card className="w-full max-w-lg">
         <CardHeader className="items-center text-center">
-            <UserCircle2 className="h-24 w-24 text-muted-foreground" />
+           <Avatar className="h-24 w-24">
+              <AvatarImage src={`https://picsum.photos/seed/${user.email}/200/200`} alt={user.name} data-ai-hint="profile picture" />
+              <AvatarFallback>{user.name?.[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
           <div className="pt-2">
             <CardTitle className="text-2xl">{user.name}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
