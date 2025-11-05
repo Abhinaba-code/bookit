@@ -278,6 +278,138 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     durationMins: 480,
     rating: 4.9,
     tags: ["hiking", "cultural", "world", "bhutan"]
+  },
+  {
+    id: 23,
+    title: "Serengeti Grand Safari",
+    slug: "serengeti-grand-safari",
+    location: "Serengeti, Tanzania",
+    description: "A comprehensive safari across the Serengeti, offering chances to see the 'big five' and stunning landscapes.",
+    price: 18000,
+    currency: "INR",
+    durationMins: 11520,
+    rating: 4.9,
+    tags: ["safari", "adventure", "world", "africa"]
+  },
+  {
+    id: 24,
+    title: "Sydney Harbour Bridge Climb",
+    slug: "sydney-harbour-bridge-climb",
+    location: "Sydney, Australia",
+    description: "Get a 360-degree panorama of Sydney as you climb the iconic Harbour Bridge. A thrilling urban adventure.",
+    price: 9500,
+    currency: "INR",
+    durationMins: 210,
+    rating: 4.8,
+    tags: ["adventure", "explorer", "world", "australia"]
+  },
+  {
+    id: 25,
+    title: "Grand Canyon Expedition",
+    slug: "grand-canyon-expedition",
+    location: "Arizona, USA",
+    description: "Explore the depths of the Grand Canyon on this multi-day hiking and camping adventure.",
+    price: 22000,
+    currency: "INR",
+    durationMins: 4320,
+    rating: 4.9,
+    tags: ["hiking", "explorer", "world", "america"]
+  },
+  {
+    id: 26,
+    title: "Punakha Dzong Cultural Visit",
+    slug: "punakha-dzong-cultural-visit",
+    location: "Punakha, Bhutan",
+    description: "Visit one of Bhutan's most beautiful and significant dzongs, the winter residence of the central monastic body.",
+    price: 6000,
+    currency: "INR",
+    durationMins: 180,
+    rating: 4.8,
+    tags: ["cultural", "explorer", "world", "bhutan"]
+  },
+  {
+    id: 27,
+    title: "Goa Beach Hopping",
+    slug: "goa-beach-hopping",
+    location: "North Goa, Goa",
+    description: "Explore the famous beaches of North Goa, from the bustling Baga to the serene shores of Morjim.",
+    price: 1800,
+    currency: "INR",
+    durationMins: 480,
+    rating: 4.6,
+    tags: ["beach", "explorer", "indian", "goa"]
+  },
+  {
+    id: 28,
+    title: "Zanskar Valley Trek",
+    slug: "zanskar-valley-trek",
+    location: "Ladakh, J&K",
+    description: "A remote and challenging trek through the 'frozen river' of Zanskar, for the most adventurous souls.",
+    price: 12000,
+    currency: "INR",
+    durationMins: 12960,
+    rating: 4.9,
+    tags: ["hiking", "adventure", "indian"]
+  },
+  {
+    id: 29,
+    title: "Udaipur City of Lakes Tour",
+    slug: "udaipur-city-of-lakes-tour",
+    location: "Udaipur, Rajasthan",
+    description: "Explore the romantic city of Udaipur, with its stunning palaces, lakes, and vibrant bazaars.",
+    price: 2800,
+    currency: "INR",
+    durationMins: 480,
+    rating: 4.8,
+    tags: ["cultural", "explorer", "indian", "rajasthan"]
+  },
+  {
+    id: 30,
+    title: "Kerala Backwaters Canoe Trip",
+    slug: "kerala-backwaters-canoe-trip",
+    location: "Kumarakom, Kerala",
+    description: "A peaceful journey through the narrow canals of the backwaters in a traditional canoe.",
+    price: 1500,
+    currency: "INR",
+    durationMins: 240,
+    rating: 4.7,
+    tags: ["cultural", "beach", "indian", "kerala"]
+  },
+  {
+    id: 31,
+    title: "Great Barrier Reef Snorkeling",
+    slug: "great-barrier-reef-snorkeling",
+    location: "Queensland, Australia",
+    description: "Snorkel in the world's largest coral reef system and witness a dazzling array of marine biodiversity.",
+    price: 11000,
+    currency: "INR",
+    durationMins: 480,
+    rating: 4.9,
+    tags: ["beach", "adventure", "world", "australia"]
+  },
+  {
+    id: 32,
+    title: "New York City Explorer",
+    slug: "new-york-city-explorer",
+    location: "New York, USA",
+    description: "Discover the iconic landmarks of the city that never sleeps, from Times Square to the Statue of Liberty.",
+    price: 18000,
+    currency: "INR",
+    durationMins: 2880,
+    rating: 4.7,
+    tags: ["explorer", "cultural", "world", "america"]
+  },
+  {
+    id: 33,
+    title: "Victoria Falls Adventure",
+    slug: "victoria-falls-adventure",
+    location: "Zambia/Zimbabwe",
+    description: "Witness the awe-inspiring power of 'The Smoke that Thunders' and partake in thrilling activities like bungee jumping.",
+    price: 16000,
+    currency: "INR",
+    durationMins: 1440,
+    rating: 4.9,
+    tags: ["adventure", "explorer", "world", "africa"]
   }
 ];
 

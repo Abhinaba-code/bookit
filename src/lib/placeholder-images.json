@@ -105,8 +105,98 @@
     {
       "id": "18",
       "description": "A beach trek in Gokarna.",
-      "imageUrl": "https://images.unsplash.com/photo-1711445064773-af2378013d74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiZWFjaCUyMHRyZWt8ZW58MHx8fHwxNzYyMzI2MzA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1711445064773-af2378013d74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiZWFjaCUyMHRyZWt8ZW58MHx8fHwxNzYyMzI2MzA3fDA&ixlibrb-4.1.0&q=80&w=1080",
       "imageHint": "beach trek"
+    },
+    {
+      "id": "19",
+      "description": "African Safari Adventure in Masai Mara.",
+      "imageUrl": "https://images.unsplash.com/photo-1534767258874-a3dd3cb73447?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "africa safari"
+    },
+    {
+      "id": "20",
+      "description": "Exploring the Australian Outback and Uluru.",
+      "imageUrl": "https://images.unsplash.com/photo-1528266222669-237a7a4134b6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "australia outback"
+    },
+    {
+      "id": "21",
+      "description": "American Road Trip along Route 66.",
+      "imageUrl": "https://images.unsplash.com/photo-1541522299232-c63ac56d952e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "route 66"
+    },
+    {
+      "id": "22",
+      "description": "Trek to Tiger's Nest in Bhutan.",
+      "imageUrl": "https://images.unsplash.com/photo-1541887044391-63a1c687053b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "bhutan monastery"
+    },
+    {
+      "id": "23",
+      "description": "A comprehensive safari across the Serengeti.",
+      "imageUrl": "https://images.unsplash.com/photo-1534437431703-753b2349479e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "serengeti safari"
+    },
+    {
+      "id": "24",
+      "description": "Climb the iconic Sydney Harbour Bridge.",
+      "imageUrl": "https://images.unsplash.com/photo-1524293581299-43c2a4173c6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "sydney bridge"
+    },
+    {
+      "id": "25",
+      "description": "Hiking and camping in the Grand Canyon.",
+      "imageUrl": "https://images.unsplash.com/photo-1506155648694-7think_about_the_way_that_you_want_to_go?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "grand canyon"
+    },
+    {
+      "id": "26",
+      "description": "Cultural visit to Punakha Dzong, Bhutan.",
+      "imageUrl": "https://images.unsplash.com/photo-1587375217601-721200375a3c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "bhutan dzong"
+    },
+    {
+      "id": "27",
+      "description": "Explore the famous beaches of North Goa.",
+      "imageUrl": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "goa beach"
+    },
+    {
+      "id": "28",
+      "description": "Remote and challenging trek through Zanskar Valley.",
+      "imageUrl": "https://images.unsplash.com/photo-1626621596720-5a4a55543594?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "zanskar valley"
+    },
+    {
+      "id": "29",
+      "description": "Explore the romantic city of Udaipur, Rajasthan.",
+      "imageUrl": "https://images.unsplash.com/photo-1599661046223-118f88284568?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "udaipur palace"
+    },
+    {
+      "id": "30",
+      "description": "Peaceful journey through Kerala backwaters in a canoe.",
+      "imageUrl": "https://images.unsplash.com/photo-1602216056096-3b404029a909?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "kerala backwaters"
+    },
+    {
+      "id": "31",
+      "description": "Snorkel in the Great Barrier Reef.",
+      "imageUrl": "https://images.unsplash.com/photo-1589949168490-5343f87968ea?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "barrier reef"
+    },
+    {
+      "id": "32",
+      "description": "Discover the iconic landmarks of New York City.",
+      "imageUrl": "https://images.unsplash.com/photo-1546436836-07a91091f160?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "new york"
+    },
+    {
+      "id": "33",
+      "description": "Witness the awe-inspiring power of Victoria Falls.",
+      "imageUrl": "https://images.unsplash.com/photo-1588880652016-30236405e8a3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1080&q=80",
+      "imageHint": "victoria falls"
     }
   ]
 }
