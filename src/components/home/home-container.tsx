@@ -41,7 +41,10 @@ export function HomeContainer({
   };
 
   const filteredExperiences = experiences.filter((experience) => {
-    const searchMatch = experience.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+    const searchMatch =
+      experience.title.toLowerCase().includes(lowercasedSearchTerm) ||
+      experience.location.toLowerCase().includes(lowercasedSearchTerm);
     
     const categoryMatch = 
         selectedCategories.length === 0 || 
@@ -77,7 +80,7 @@ export function HomeContainer({
                 <Input
                 type="text"
                 name="search"
-                placeholder="Search for experiences..."
+                placeholder="Search by title or location..."
                 className="flex-1"
                 />
                 <Button type="submit">
