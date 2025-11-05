@@ -62,7 +62,17 @@ const callbackFormSchema = z.object({
     status: z.enum(["PENDING", "CONTACTED", "CLOSED"]),
 });
 
-const formSchema = z.union([messageFormSchema, callbackFormSchema]);
+const formSchema = z.union([
+    messageFormSchema.extend({
+        city: z.string().optional(),
+        adults: z.number().optional(),
+        children: z.number().optional(),
+        infants: z.number().optional(),
+        dateOfTravel: z.date().optional(),
+        query: z.string().optional()
+    }), 
+    callbackFormSchema
+]);
 
 type EditRequestFormValues = z.infer<typeof formSchema>;
 
@@ -99,9 +109,9 @@ export function EditRequestDialog({
       let result;
 
       if (isCallback) {
-        result = await updateCallbackRequest(updateData);
+        result = await updateCallbackRequest(updateData as any);
       } else {
-        result = await updateMessageRequest(updateData);
+        result = await updateMessageRequest(updateData as any);
       }
 
       if (result.success) {
