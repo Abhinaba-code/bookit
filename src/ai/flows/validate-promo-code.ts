@@ -44,14 +44,15 @@ const validatePromoCodeFlow = ai.defineFlow(
   },
   async ({ code, subtotal, userEmail }) => {
     
+    // Only 'SAVE10' is a valid code. Reject all others.
     if (code.toUpperCase() !== 'SAVE10') {
       return {
         valid: false,
-        reason: 'Invalid promo code.',
+        reason: 'Invalid promo code. Please try another.',
       };
     }
 
-    // Check if user has already used this code
+    // For the 'SAVE10' code, check if the user has already used it.
     if (userEmail) {
         const allBookings = getStoredBookings();
         const hasUsedCode = allBookings.some(
@@ -61,7 +62,7 @@ const validatePromoCodeFlow = ai.defineFlow(
         if (hasUsedCode) {
             return {
                 valid: false,
-                reason: 'This promo code has already been used.',
+                reason: 'This promo code has already been used once.',
             };
         }
     }
@@ -76,7 +77,7 @@ const validatePromoCodeFlow = ai.defineFlow(
       value: discountValue,
       discountAmount: discountAmount,
       total: total,
-      reason: 'Valid promo code',
+      reason: 'Promo code applied successfully!',
     };
   }
 );
