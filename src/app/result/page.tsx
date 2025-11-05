@@ -53,7 +53,7 @@ function ResultContent() {
             </Button>
             {success && bookingId && (
                  <Button asChild className="w-full">
-                    <Link href={`/my-bookings?bookingId=${bookingId}`}>View My Booking</Link>
+                    <Link href={`/my-bookings`}>View My Bookings</Link>
                 </Button>
             )}
         </CardFooter>

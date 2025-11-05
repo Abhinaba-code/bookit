@@ -66,6 +66,7 @@ export async function createBooking(data: unknown) {
     bookings.push(newBooking);
 
     revalidatePath(`/experience/${experience.slug}`);
+    revalidatePath('/my-bookings');
 
     return {
       success: true,
@@ -84,4 +85,9 @@ export async function getBookingById(bookingId: string) {
         return { success: false, error: "Booking ID not found." };
     }
     return { success: true, booking };
+}
+
+export async function getAllBookings() {
+    // In a real app, you'd fetch this for the logged-in user from a database
+    return { success: true, bookings: [...bookings] };
 }

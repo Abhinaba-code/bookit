@@ -3,16 +3,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { getBookingById } from "@/lib/actions";
+import { getAllBookings } from "@/lib/actions";
 import { getExperienceById, getSlotById } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { useToast } from "@/hooks/use-toast";
 import type { Booking, ExperienceDetail, Slot } from "@/types";
 import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type EnrichedBooking = Booking & {
     experienceTitle: string;
@@ -20,102 +19,13 @@ type EnrichedBooking = Booking & {
     slotDate: string;
 };
 
-export default function MyBookingsPage() {
-  const searchParams = useSearchParams();
-  const [bookingId, setBookingId] = useState(searchParams.get("bookingId") || "");
-  const [booking, setBooking] = useState<EnrichedBooking | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSearch = async (idToSearch: string) => {
-    if (!idToSearch) {
-      toast({ title: "Please enter a booking ID.", variant: "destructive" });
-      return;
-    }
-    setIsLoading(true);
-    setBooking(null);
-
-    const result = await getBookingById(idToSearch);
-    
-    if (result.success && result.booking) {
-      const experience = await getExperienceById(result.booking.experienceId);
-      const slot = await getSlotById(result.booking.slotId);
-
-      if (experience && slot) {
-        const enrichedBooking: EnrichedBooking = {
-          ...result.booking,
-          experienceTitle: experience.title,
-          experienceSlug: experience.slug,
-          slotDate: slot.startsAt,
-        };
-        setBooking(enrichedBooking);
-      } else {
-        toast({ title: "Error fetching booking details.", description: "Could not find associated experience or slot.", variant: "destructive" });
-      }
-
-    } else {
-      toast({ title: "Booking not found.", description: result.error, variant: "destructive" });
-    }
-    setIsLoading(false);
-  };
-  
-  // Automatically search if bookingId is in the URL on initial render
-  useEffect(() => {
-    const urlBookingId = searchParams.get("bookingId");
-    if (urlBookingId) {
-      setBookingId(urlBookingId);
-      handleSearch(urlBookingId);
-    }
-  }, [searchParams]);
-
-  const onSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSearch(bookingId);
-  }
-
-  const handleCancelBooking = async () => {
-    if (!booking) return;
-    setBooking(prev => prev ? { ...prev, status: 'CANCELLED' } : null);
-    toast({ title: "Booking Cancelled", description: "Your booking has been cancelled." });
-  }
-
-  return (
-    <Container className="py-12">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">
-            Manage Your Bookings
-          </h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            Enter your booking ID to view, modify, or cancel your reservation.
-          </p>
-        </div>
-
-        <Card className="mb-8">
+function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel: (id: string) => void }) {
+    const isCancelled = booking.status === 'CANCELLED';
+    return (
+        <Card>
             <CardHeader>
-                <CardTitle>Find Your Booking</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={onSearchSubmit} className="flex gap-2">
-                    <Input
-                        placeholder="Enter your booking ID (e.g., a UUID)"
-                        value={bookingId}
-                        onChange={(e) => setBookingId(e.target.value)}
-                    />
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading ? "Searching..." : "Search"}
-                    </Button>
-                </form>
-            </CardContent>
-        </Card>
-
-        {isLoading && <p className="text-center">Loading booking details...</p>}
-
-        {booking && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{booking.experienceTitle}</CardTitle>
-              <CardDescription>Confirmation Code: {booking.id.slice(-8).toUpperCase()}</CardDescription>
+                <CardTitle>{booking.experienceTitle}</CardTitle>
+                <CardDescription>Confirmation Code: {booking.id.slice(-8).toUpperCase()}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
@@ -142,17 +52,92 @@ export default function MyBookingsPage() {
                     <h3 className="font-semibold">Status</h3>
                     <p className="text-muted-foreground font-semibold">{booking.status}</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <Button asChild variant="outline" className="w-full" disabled={booking.status === 'CANCELLED'}>
+                <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    <Button asChild variant="outline" className="w-full" disabled={isCancelled}>
                         <Link href={`/checkout?experienceId=${booking.experienceId}&slotId=${booking.slotId}`}>Edit Booking</Link>
                     </Button>
-                    <Button variant="destructive" className="w-full" onClick={handleCancelBooking} disabled={booking.status === 'CANCELLED'}>
-                        {booking.status === 'CANCELLED' ? 'Booking Cancelled' : 'Cancel Booking'}
+                    <Button variant="destructive" className="w-full" onClick={() => onCancel(booking.id)} disabled={isCancelled}>
+                        {isCancelled ? 'Booking Cancelled' : 'Cancel Booking'}
                     </Button>
                 </div>
             </CardContent>
-          </Card>
-        )}
+        </Card>
+    );
+}
+
+export default function MyBookingsPage() {
+  const [bookings, setBookings] = useState<EnrichedBooking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setIsLoading(true);
+      const result = await getAllBookings();
+      
+      if (result.success && result.bookings) {
+        const enrichedBookings = await Promise.all(
+          result.bookings.map(async (booking) => {
+            const experience = await getExperienceById(booking.experienceId);
+            const slot = await getSlotById(booking.slotId);
+            return {
+              ...booking,
+              experienceTitle: experience?.title || "Unknown Experience",
+              experienceSlug: experience?.slug || "",
+              slotDate: slot?.startsAt || new Date().toISOString(),
+            };
+          })
+        );
+        // sort by most recent
+        enrichedBookings.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setBookings(enrichedBookings);
+      } else {
+        toast({ title: "Error", description: "Could not fetch bookings.", variant: "destructive" });
+      }
+      setIsLoading(false);
+    };
+
+    fetchBookings();
+  }, [toast]);
+
+  const handleCancelBooking = (bookingId: string) => {
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'CANCELLED' } : b));
+    toast({ title: "Booking Cancelled", description: "Your booking has been cancelled." });
+  }
+
+  return (
+    <Container className="py-12">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">
+            My Bookings
+          </h1>
+          <p className="text-lg text-muted-foreground mt-2">
+            View and manage your recent bookings.
+          </p>
+        </div>
+        
+        <div className="space-y-6">
+            {isLoading && (
+                <>
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-96 w-full" />
+                </>
+            )}
+            {!isLoading && bookings.length === 0 && (
+                <Card>
+                    <CardContent className="pt-6">
+                        <p className="text-center text-muted-foreground">You have no active bookings.</p>
+                        <Button asChild className="mt-4 w-full">
+                            <Link href="/">Explore Tours</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
+            {!isLoading && bookings.map(booking => (
+                <BookingCard key={booking.id} booking={booking} onCancel={handleCancelBooking}/>
+            ))}
+        </div>
       </div>
     </Container>
   );
