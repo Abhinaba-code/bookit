@@ -120,21 +120,19 @@ export default function MyBookingsPage() {
 
   const handleCancelBooking = (bookingId: string) => {
     const allBookings = getStoredBookings();
-    const bookingIndex = allBookings.findIndex(b => b.id === bookingId);
+    const bookingToCancel = allBookings.find(b => b.id === bookingId);
 
-    if (bookingIndex === -1) {
+    if (!bookingToCancel) {
         toast({ title: "Error", description: "Booking not found.", variant: "destructive" });
         return;
     }
-
-    const bookingToCancel = allBookings[bookingIndex];
-    
-    // Update status to CANCELLED
-    allBookings[bookingIndex].status = 'CANCELLED';
-    saveStoredBookings(allBookings);
     
     // Refund the amount
     addBalance(bookingToCancel.total);
+    
+    // Remove the booking from storage
+    const updatedBookings = allBookings.filter(b => b.id !== bookingId);
+    saveStoredBookings(updatedBookings);
 
     // Re-fetch to update the UI state correctly
     fetchBookings();
