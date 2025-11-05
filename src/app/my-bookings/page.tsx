@@ -136,8 +136,8 @@ export default function MyBookingsPage() {
     const updatedBookings = allBookings.filter(b => b.id !== bookingId);
     saveStoredBookings(updatedBookings);
 
-    // Re-fetch to update the UI state correctly
-    fetchBookings();
+    // Update the UI state directly
+    setBookings(prevBookings => prevBookings.filter(b => b.id !== bookingId));
     
     toast({ 
         title: "Booking Cancelled", 
