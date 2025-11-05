@@ -4,10 +4,12 @@ import { Container } from "@/components/ui/container";
 import { Sidebar } from "@/components/layout/sidebar";
 import { ExperienceList } from "@/components/experience/experience-list";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { ExperienceSummary } from "@/types";
+import { ExperienceContainer } from "@/components/experience/experience-container";
 
 async function Experiences() {
   const experiences = await getExperiences();
-  return <ExperienceList experiences={experiences} />;
+  return <ExperienceContainer experiences={experiences} />;
 }
 
 function ExperiencesSkeleton() {

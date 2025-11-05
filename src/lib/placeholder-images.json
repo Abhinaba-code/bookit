@@ -47,6 +47,66 @@
       "description": "Stargazing night with powerful telescopes.",
       "imageUrl": "https://images.unsplash.com/photo-1681963709837-3be04f728255?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzdGFyZ2F6aW5nJTIwbmlnaHR8ZW58MHx8fHwxNzYyMzI0NDcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "stargazing night"
+    },
+    {
+      "id": "9",
+      "description": "A tour of a tea plantation in Munnar.",
+      "imageUrl": "https://images.unsplash.com/photo-1593335663758-4da70281a917?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0ZWElMjBwbGFudGF0aW9ufGVufDB8fHx8MTc2MjIyMjM0MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tea plantation"
+    },
+    {
+      "id": "10",
+      "description": "Paragliding over the mountains in Bir Billing.",
+      "imageUrl": "https://images.unsplash.com/photo-1712841608930-4704d065d10c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwYXJhZ2xpZGluZyUyMG1vdW50YWluc3xlbnwwfHx8fDE3NjIzMjYzMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "paragliding mountains"
+    },
+    {
+      "id": "11",
+      "description": "A houseboat cruise in the backwaters of Alleppey.",
+      "imageUrl": "https://images.unsplash.com/photo-1670332936798-5141cfdd453d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxob3VzZWJvYXQlMjBiYWNrd2F0ZXJzfGVufDB8fHx8MTc2MjMyNjMwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "houseboat backwaters"
+    },
+    {
+      "id": "12",
+      "description": "Trekking to the living root bridges in Meghalaya.",
+      "imageUrl": "https://images.unsplash.com/photo-1625233142397-05e3b529c778?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyb290JTIwYnJpZGdlc3xlbnwwfHx8fDE3NjIzMjYzMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "root bridges"
+    },
+    {
+      "id": "13",
+      "description": "A camel safari in the Thar Desert.",
+      "imageUrl": "https://images.unsplash.com/photo-1489493585363-d69421e0edd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjYW1lbCUyMGRlc2VydHxlbnwwfHx8fDE3NjIzMjYzMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "camel desert"
+    },
+    {
+      "id": "14",
+      "description": "Skiing on the slopes of Gulmarg.",
+      "imageUrl": "https://images.unsplash.com/photo-1646000048878-2301951861c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxza2lpbmclMjBzbm93fGVufDB8fHx8MTc2MjMyNjMwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "skiing snow"
+    },
+    {
+      "id": "15",
+      "description": "An expedition to Dudhsagar Falls.",
+      "imageUrl": "https://images.unsplash.com/photo-1578307706086-6222f538bd92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3YXRlcmZhbGwlMjBqdW5nbGV8ZW58MHx8fHwxNzYyMjk0MDI0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "waterfall jungle"
+    },
+    {
+      "id": "16",
+      "description": "A trek through the Valley of Flowers.",
+      "imageUrl": "https://images.unsplash.com/photo-1533880020541-22c0ff17d4a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmbG93ZXIlMjB2YWxsZXl8ZW58MHx8fHwxNzYyMzI2MzA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flower valley"
+    },
+    {
+      "id": "17",
+      "description": "A wildlife safari in Jim Corbett National Park.",
+      "imageUrl": "https://images.unsplash.com/photo-1713598826548-86a16ba5fe5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0aWdlciUyMHNhZmFyaXxlbnwwfHx8fDE3NjIzMjYzMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tiger safari"
+    },
+    {
+      "id": "18",
+      "description": "A beach trek in Gokarna.",
+      "imageUrl": "https://images.unsplash.com/photo-1711445064773-af2378013d74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiZWFjaCUyMHRyZWt8ZW58MHx8fHwxNzYyMzI2MzA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "beach trek"
     }
   ]
 }
