@@ -3,11 +3,10 @@
 
 import { useState, useEffect, useTransition } from "react";
 import {
-  getAllCallbackRequests,
-  getAllMessageRequests,
   deleteCallbackRequest,
   deleteMessageRequest,
 } from "@/lib/actions";
+import { getStoredCallbackRequests, getStoredMessageRequests } from "@/lib/data";
 import { getExperienceById } from "@/lib/api";
 import type { CallbackRequest, MessageRequest } from "@/types";
 import { Container } from "@/components/ui/container";
@@ -62,19 +61,18 @@ export default function AdminRequestsPage() {
 
   const fetchAndSetData = async () => {
     setIsLoading(true);
-    const [callbackRes, messageRes] = await Promise.all([
-      getAllCallbackRequests(),
-      getAllMessageRequests(),
+    // Directly use localStorage-accessing functions on the client
+    const callbackReqs = getStoredCallbackRequests();
+    const messageReqs = getStoredMessageRequests();
+    
+    const [enrichedCallbacks, enrichedMessages] = await Promise.all([
+        enrichRequests(callbackReqs),
+        enrichRequests(messageReqs)
     ]);
 
-    if (callbackRes.success && callbackRes.requests) {
-      const enriched = await enrichRequests(callbackRes.requests);
-      setCallbackRequests(enriched);
-    }
-    if (messageRes.success && messageRes.requests) {
-      const enriched = await enrichRequests(messageRes.requests);
-      setMessageRequests(enriched);
-    }
+    setCallbackRequests(enrichedCallbacks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    setMessageRequests(enrichedMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    
     setIsLoading(false);
   };
 
@@ -91,7 +89,7 @@ export default function AdminRequestsPage() {
         const result = await deleteCallbackRequest(req.id);
         if (result.success) {
             setCallbackRequests(prev => prev.filter(r => r.id !== req.id));
-            removeSentRequest('callback', req.experienceId, req.email);
+            if (user?.email) removeSentRequest('callback', req.experienceId, user.email);
             toast({ title: "Success", description: "Callback request deleted." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -104,7 +102,7 @@ export default function AdminRequestsPage() {
         const result = await deleteMessageRequest(req.id);
         if (result.success) {
             setMessageRequests(prev => prev.filter(r => r.id !== req.id));
-            removeSentRequest('message', req.experienceId, req.email);
+            if (user?.email) removeSentRequest('message', req.experienceId, user.email);
             toast({ title: "Success", description: "Message request deleted." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -246,3 +244,5 @@ export default function AdminRequestsPage() {
     </Container>
   );
 }
+
+    
