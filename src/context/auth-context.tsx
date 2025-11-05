@@ -6,6 +6,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 type User = {
   name: string;
   email: string;
+  balance: number;
 };
 
 type UserWithPassword = User & { password?: string; oldPassword?: string };
@@ -25,6 +26,8 @@ type AuthContextType = {
   hasSentRequest: (type: 'callback' | 'message', experienceId: number) => boolean;
   addSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
   removeSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
+  addBalance: (amount: number) => void;
+  deductBalance: (amount: number) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,14 +62,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
+  const updateUserInStorage = (userObj: User) => {
+    const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const userIndex = storedUsers.findIndex(u => u.email === userObj.email);
+    if(userIndex > -1) {
+      storedUsers[userIndex] = { ...storedUsers[userIndex], ...userObj };
+      localStorage.setItem('bookit_users', JSON.stringify(storedUsers));
+    }
+    localStorage.setItem('bookit_user', JSON.stringify(userObj));
+    setUser(userObj);
+  }
+
+  const addBalance = (amount: number) => {
+    if (user && amount > 0) {
+      const newBalance = user.balance + amount;
+      const updatedUser = { ...user, balance: newBalance };
+      updateUserInStorage(updatedUser);
+    }
+  }
+
+  const deductBalance = (amount: number) => {
+    if (user && user.balance >= amount) {
+      const newBalance = user.balance - amount;
+      const updatedUser = { ...user, balance: newBalance };
+      updateUserInStorage(updatedUser);
+    } else {
+        throw new Error("Insufficient balance");
+    }
+  }
+
   const login = (email: string, pass: string) => {
     const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
     const foundUser = storedUsers.find((u: any) => u.email === email && u.password === pass);
 
     if (foundUser) {
       const { password, ...userToStore } = foundUser;
-      setUser(userToStore);
-      localStorage.setItem('bookit_user', JSON.stringify(userToStore));
+      // Ensure balance is a number
+      const fullUser = { ...userToStore, balance: Number(userToStore.balance) || 0 };
+      setUser(fullUser);
+      localStorage.setItem('bookit_user', JSON.stringify(fullUser));
     } else {
       throw new Error('Invalid email or password');
     }
@@ -80,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('An account with this email already exists.');
     }
     
-    const newUser = { name, email, password: pass };
+    const newUser: UserWithPassword = { name, email, password: pass, balance: 10000 }; // Start with 10000 fake money
     const updatedUsers = [...storedUsers, newUser];
     localStorage.setItem('bookit_users', JSON.stringify(updatedUsers));
     
@@ -173,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, sentRequests]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser, hasSentRequest, addSentRequest, removeSentRequest }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser, hasSentRequest, addSentRequest, removeSentRequest, addBalance, deductBalance }}>
       {children}
     </AuthContext.Provider>
   );

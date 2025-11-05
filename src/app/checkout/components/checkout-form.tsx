@@ -10,6 +10,7 @@ import { validatePromoCode } from "@/ai/flows/validate-promo-code";
 import { createBooking } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { ExperienceDetail, Slot } from "@/types";
+import { useAuth } from "@/context/auth-context";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +83,7 @@ export function CheckoutForm({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const { user, deductBalance } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
@@ -99,7 +101,7 @@ export function CheckoutForm({
       title: "Mr",
       firstName: "",
       lastName: "",
-      email: "",
+      email: user?.email || "",
       phone: "",
       gender: "male",
       promoCode: "",
@@ -156,6 +158,15 @@ export function CheckoutForm({
         return;
     }
 
+    if (user && user.balance < total) {
+      toast({
+        title: "Insufficient Balance",
+        description: "You do not have enough funds in your wallet. Please add more.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     startTransition(async () => {
       const bookingData = {
         experienceId: experience.id,
@@ -173,9 +184,18 @@ export function CheckoutForm({
       const result = await createBooking(bookingData);
 
       if (result.success) {
-        router.push(
-          `/result?bookingId=${result.bookingId}&code=${result.confirmationCode}&total=${result.total}`
-        );
+        try {
+            deductBalance(total);
+            router.push(
+                `/result?bookingId=${result.bookingId}&code=${result.confirmationCode}&total=${result.total}`
+            );
+        } catch (e: any) {
+            toast({
+                title: "Payment Failed",
+                description: e.message || "Could not deduct from balance.",
+                variant: "destructive",
+            });
+        }
       } else {
         toast({
           title: "Booking Failed",
@@ -350,9 +370,9 @@ export function CheckoutForm({
                         </FormItem>
                     )}
                 />
-              <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+              <Button type="submit" size="lg" className="w-full" disabled={isPending || !user}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Book Now
+                {user ? "Pay with Wallet" : "Login to Book"}
               </Button>
             </CardContent>
           </Card>
@@ -361,4 +381,3 @@ export function CheckoutForm({
     </Form>
   );
 }
-    

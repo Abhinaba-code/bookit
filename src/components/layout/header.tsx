@@ -1,7 +1,7 @@
 
 "use client";
 
-import { MountainSnow, Phone } from "lucide-react";
+import { MountainSnow, Wallet } from "lucide-react";
 import Link from "next/link";
 import { Container } from "../ui/container";
 import { Button } from "../ui/button";
@@ -31,6 +31,10 @@ export function Header() {
         <nav className="flex items-center gap-4 text-sm font-medium">
           {user ? (
             <>
+              <Link href="/wallet" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                <Wallet className="h-5 w-5" />
+                <span>₹{user.balance.toFixed(2)}</span>
+              </Link>
               <Link href="/my-bookings" className="text-muted-foreground hover:text-primary transition-colors">
                 My Bookings
               </Link>
@@ -57,6 +61,9 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/wallet">My Wallet</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
