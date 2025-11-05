@@ -4,7 +4,6 @@ import { PlaceHolderImages } from "./placeholder-images";
 
 const addDays = (days: number) => {
   const date = new Date();
-  // Set time to a neutral point to avoid timezone issues during date-only rendering
   date.setUTCHours(12, 0, 0, 0);
   date.setUTCDate(date.getUTCDate() + days);
   return date;
@@ -409,48 +408,57 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
   }
 ];
 
-const generatedSlots: Slot[] = [];
-experiencesData.forEach(exp => {
-    const remainingSeatsOptions = [0, 10, 4, 15, 8];
-    for (let i = 1; i <= 5; i++) {
-        const capacity = 15;
-        const remaining = remainingSeatsOptions[i-1 % remainingSeatsOptions.length];
-        
-        // Create the date in UTC
-        const year = new Date().getUTCFullYear();
-        const month = new Date().getUTCMonth();
-        const day = (i * 5) % 28; // Keep days within a reasonable range
-        const startHour = i % 2 === 0 ? 9 : 14; // 9 AM or 2 PM UTC
+let initialSlots: Slot[] | null = null;
 
-        const startsAtDate = new Date(Date.UTC(year, month, day, startHour, 0, 0, 0));
+const generateInitialSlots = (): Slot[] => {
+    if (initialSlots) return initialSlots;
 
-        // Ensure date is in the future
-        if (startsAtDate < new Date()) {
-            startsAtDate.setUTCFullYear(year + 1);
+    const generatedSlots: Slot[] = [];
+    experiencesData.forEach(exp => {
+        const remainingSeatsOptions = [0, 10, 4, 15, 8];
+        for (let i = 1; i <= 5; i++) {
+            const capacity = 15;
+            const remaining = remainingSeatsOptions[i-1 % remainingSeatsOptions.length];
+            
+            const startsAtDate = addDays((exp.id * 2) + i);
+
+            generatedSlots.push({
+                id: generatedSlots.length + 1,
+                experienceId: exp.id,
+                startsAt: startsAtDate.toISOString(),
+                capacity: capacity,
+                remaining: remaining,
+                isSoldOut: remaining === 0,
+            });
         }
+    });
+    initialSlots = generatedSlots;
+    return initialSlots;
+}
 
-        generatedSlots.push({
-            id: generatedSlots.length + 1,
-            experienceId: exp.id,
-            startsAt: startsAtDate.toISOString(),
-            capacity: capacity,
-            remaining: remaining,
-            isSoldOut: remaining === 0,
-        });
-    }
-});
-
-
-export const experiences: ExperienceDetail[] = experiencesData.map((exp, index) => {
+export const experiences: Omit<ExperienceDetail, 'slots'>[] = experiencesData.map((exp, index) => {
   const placeholder = PlaceHolderImages[index % PlaceHolderImages.length];
   return {
   ...exp,
   imageUrl: placeholder.imageUrl,
   imageHint: placeholder.imageHint,
-  slots: generatedSlots.filter(slot => slot.experienceId === exp.id),
 }});
 
-export const slots: Slot[] = generatedSlots;
+export function getStoredSlots(): Slot[] {
+  if (typeof window === 'undefined') return generateInitialSlots();
+  const stored = sessionStorage.getItem('bookit_slots');
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  const slots = generateInitialSlots();
+  saveStoredSlots(slots);
+  return slots;
+}
+
+export function saveStoredSlots(slots: Slot[]) {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem('bookit_slots', JSON.stringify(slots));
+}
 
 // Use functions to get/set from sessionStorage to ensure it's only called on the client
 export function getStoredBookings(): Booking[] {
@@ -464,7 +472,6 @@ export function saveStoredBookings(bookings: Booking[]) {
   sessionStorage.setItem('bookit_bookings', JSON.stringify(bookings));
 }
 
-// Stubs for request data - will be moved to sessionStorage
 export function getStoredCallbackRequests(): CallbackRequest[] {
     if (typeof window === 'undefined') return [];
     const stored = sessionStorage.getItem('bookit_callback_requests');
@@ -486,8 +493,3 @@ export function saveStoredMessageRequests(requests: MessageRequest[]) {
     if (typeof window === 'undefined') return;
     sessionStorage.setItem('bookit_message_requests', JSON.stringify(requests));
 }
-    
-
-
-    
-

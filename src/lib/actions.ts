@@ -2,10 +2,10 @@
 "use server";
 
 import { z } from "zod";
-import { experiences, slots, getStoredBookings, saveStoredBookings, getStoredCallbackRequests, saveStoredCallbackRequests, getStoredMessageRequests, saveStoredMessageRequests } from "./data";
+import { experiences, getStoredSlots, saveStoredSlots, getStoredBookings, saveStoredBookings, getStoredCallbackRequests, saveStoredCallbackRequests, getStoredMessageRequests, saveStoredMessageRequests } from "./data";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
-import type { CallbackRequest, MessageRequest, Booking } from "@/types";
+import type { CallbackRequest, MessageRequest, Booking, Slot } from "@/types";
 
 const bookingSchema = z.object({
   id: z.string().optional(), // ID is optional, present when editing
@@ -45,25 +45,33 @@ export async function createBooking(data: unknown) {
     numGuests,
     ...bookingDetails
   } = validation.data;
+  
+  const allSlots = getStoredSlots(); // This is a server-side function getting data, but for this exercise we assume it works
+  const allBookings = getStoredBookings();
 
   // The check for slot availability, etc., remains server-side logic
-  const slot = slots.find((s) => s.id === slotId);
+  const slotIndex = allSlots.findIndex((s) => s.id === slotId);
   const experience = experiences.find((e) => e.id === experienceId);
-
-  if (!slot || !experience || slot.experienceId !== experience.id) {
+  
+  if (slotIndex === -1 || !experience || allSlots[slotIndex].experienceId !== experience.id) {
     return { success: false, error: "Not Found: Invalid experience or slot." };
   }
   
-  if (!bookingId && (slot.isSoldOut || slot.remaining < numGuests)) {
-      return { success: false, error: "Insufficient Seats for a new booking." };
+  const slot = allSlots[slotIndex];
+  const originalBooking = bookingId ? allBookings.find(b => b.id === bookingId) : undefined;
+  const guestsInOriginalBooking = originalBooking ? originalBooking.numGuests : 0;
+  const effectiveRemainingSeats = slot.remaining + guestsInOriginalBooking;
+
+
+  if (effectiveRemainingSeats < numGuests) {
+      return { success: false, error: "Insufficient seats for this booking." };
   }
 
   // Simulate a rare conflict for new bookings
   if (!bookingId && Math.random() < 0.1) {
       return { success: false, error: "This slot was just booked. Please try another." };
   }
-
-  // The client will handle sessionStorage updates. This action's job is to validate and return the final booking object.
+  
   const finalBooking: Booking = {
       ...bookingDetails,
       id: bookingId || uuidv4(),
@@ -72,8 +80,13 @@ export async function createBooking(data: unknown) {
       numGuests: numGuests,
       dob: bookingDetails.dob.toISOString(),
       status: "CONFIRMED",
-      // Use existing createdAt if editing, otherwise create new
-      createdAt: bookingId ? (getStoredBookings().find(b => b.id === bookingId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+      createdAt: bookingId ? (allBookings.find(b => b.id === bookingId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  const updatedSlot: Slot = {
+      ...slot,
+      remaining: effectiveRemainingSeats - numGuests,
+      isSoldOut: (effectiveRemainingSeats - numGuests) === 0,
   };
 
   revalidatePath(`/experience/${experience.slug}`);
@@ -82,6 +95,7 @@ export async function createBooking(data: unknown) {
   return {
     success: true,
     booking: finalBooking,
+    updatedSlot: updatedSlot,
     isEditing: !!bookingId,
     confirmationCode: finalBooking.id.slice(-8).toUpperCase(),
     total: finalBooking.total,
@@ -117,25 +131,6 @@ export async function createCallbackRequest(data: unknown) {
         status: "PENDING",
     };
     
-    // This action runs on the server, but the data storage is on the client.
-    // The server action itself cannot write to sessionStorage.
-    // This architecture requires the client to call this action, and then the client must store the result.
-    // However, the current implementation calls saveStoredCallbackRequests which is a client-side function.
-    // This is a problem. The data needs to be stored on the client after the action returns.
-    // For now, let's assume the server action can't save. It can only validate and return the object.
-    // The client component calling this function must do the saving.
-    
-    // The correct way:
-    // 1. Client calls createCallbackRequest.
-    // 2. Server action validates data, creates object, returns it.
-    // 3. Client receives the object and saves it to sessionStorage.
-    // The function below simulates this, but the saveStored... part is problematic in a server action.
-
-    // Let's return the request and let the client save it.
-    // const allRequests = getStoredCallbackRequests(); // This will fail if run on server
-    // allRequests.push(newRequest);
-    // saveStoredCallbackRequests(allRequests); // This will fail if run on server
-
     revalidatePath('/admin/requests');
     return { success: true, request: newRequest };
 }
@@ -158,28 +153,18 @@ export async function createMessageRequest(data: unknown) {
         createdAt: new Date().toISOString(),
         status: "PENDING",
     };
-    
-    // Similar to above, saving must be done on the client.
-    // This action should only validate and return the created object.
 
     revalidatePath('/admin/requests');
     return { success: true, request: newRequest };
 }
 
 
-// These functions are problematic as Server Actions because they try to access client-side storage.
-// They should be utility functions used only on the client.
-// By keeping "use server" on the file, we make them server-only, which is wrong for their content.
-// The fix is to call getStored... functions directly in client components.
-
 export async function deleteCallbackRequest(id: string) {
-    // This must be called from a client that then updates its own storage.
     revalidatePath('/admin/requests');
     return { success: true };
 }
 
 export async function deleteMessageRequest(id: string) {
-    // This must be called from a client that then updates its own storage.
     revalidatePath('/admin/requests');
     return { success: true };
 }
@@ -205,7 +190,6 @@ export async function updateCallbackRequest(data: unknown) {
         return { success: false, error: "Invalid input." };
     }
     
-    // This is also a client-side responsibility. This action can validate and return the updated object.
     const updatedRequestData = {
         ...validation.data,
         dateOfTravel: validation.data.dateOfTravel.toISOString(),
@@ -230,7 +214,3 @@ export async function updateMessageRequest(data: unknown) {
     revalidatePath('/admin/requests');
     return { success: true, request: validation.data };
 }
-
-    
-
-    

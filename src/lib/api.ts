@@ -1,6 +1,7 @@
+
 "use server";
 
-import { experiences, slots } from "./data";
+import { experiences, getStoredSlots } from "./data";
 import { unstable_noStore as noStore } from 'next/cache';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -8,8 +9,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function getExperiences() {
   noStore();
   await delay(1000); // Simulate network latency
+  
+  const allSlots = getStoredSlots();
+
   return experiences.map((exp) => {
-    const nextAvailableSlot = exp.slots
+    const experienceSlots = allSlots.filter(s => s.experienceId === exp.id);
+    const nextAvailableSlot = experienceSlots
       .filter((s) => !s.isSoldOut && new Date(s.startsAt) > new Date())
       .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())[0];
 
@@ -37,10 +42,11 @@ export async function getExperienceBySlug(slug: string) {
   if (!experience) {
     return null;
   }
-  // Filter for future slots
+  // Filter for future slots from the stored slots
+  const allSlots = getStoredSlots();
   return {
     ...experience,
-    slots: experience.slots.filter(s => new Date(s.startsAt) > new Date())
+    slots: allSlots.filter(s => s.experienceId === experience.id && new Date(s.startsAt) > new Date())
   };
 }
 
@@ -50,11 +56,17 @@ export async function getExperienceById(id: number) {
   if (!experience) {
     return null;
   }
-  return experience;
+  // We attach the stored slots to the experience object
+  const allSlots = getStoredSlots();
+  return {
+      ...experience,
+      slots: allSlots.filter(s => s.experienceId === experience.id),
+  }
 }
 
 
 export async function getSlotById(id: number) {
     noStore();
-    return slots.find((slot) => slot.id === id) || null;
+    const allSlots = getStoredSlots();
+    return allSlots.find((slot) => slot.id === id) || null;
 }
