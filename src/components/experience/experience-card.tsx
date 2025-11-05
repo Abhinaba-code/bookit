@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock, Tag, Calendar, BedDouble, Check } from "lucide-react";
+import { Star, MapPin, Calendar, Check, Eye, Ticket, Phone, MessageSquare } from "lucide-react";
 
 const getDurationInNightsAndDays = (durationInMinutes: number): string => {
     const days = Math.ceil(durationInMinutes / (60 * 24));
@@ -78,14 +78,20 @@ export function ExperienceCard({
                 </div>
                 <Button asChild className="w-full">
                     <Link href={`/experience/${experience.slug}`}>
-                        View Details
+                        <Eye className="mr-2 h-4 w-4" /> View Details
                     </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                    <Link href={`/experience/${experience.slug}`}>Book Online</Link>
+                    <Link href={`/experience/${experience.slug}`}>
+                        <Ticket className="mr-2 h-4 w-4" /> Book Online
+                    </Link>
                 </Button>
-                <Button variant="outline" className="w-full">Request Callback</Button>
-                <Button variant="outline" className="w-full">Message Request</Button>
+                <Button variant="outline" className="w-full">
+                    <Phone className="mr-2 h-4 w-4" /> Request Callback
+                </Button>
+                <Button variant="outline" className="w-full">
+                    <MessageSquare className="mr-2 h-4 w-4" /> Message Request
+                </Button>
             </div>
         </div>
     </Card>
