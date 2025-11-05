@@ -10,6 +10,7 @@ export type ExperienceSummary = {
   rating?: number;
   nextAvailable?: string | null;
   tags?: string[];
+  durationMins: number;
 };
 
 export type Slot = {
@@ -23,7 +24,6 @@ export type Slot = {
 
 export type ExperienceDetail = Omit<ExperienceSummary, "nextAvailable"> & {
   description: string;
-  durationMins: number;
   slots: Slot[];
 };
 

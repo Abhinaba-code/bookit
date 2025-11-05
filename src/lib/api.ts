@@ -14,8 +14,17 @@ export async function getExperiences() {
       .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())[0];
 
     return {
-      ...exp,
-      slots: undefined, // Don't send all slots in summary
+      id: exp.id,
+      title: exp.title,
+      slug: exp.slug,
+      location: exp.location,
+      price: exp.price,
+      currency: exp.currency,
+      imageUrl: exp.imageUrl,
+      imageHint: exp.imageHint,
+      rating: exp.rating,
+      tags: exp.tags,
+      durationMins: exp.durationMins,
       nextAvailable: nextAvailableSlot?.startsAt || null,
     };
   });
