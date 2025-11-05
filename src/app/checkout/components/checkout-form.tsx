@@ -201,8 +201,8 @@ export function CheckoutForm({
                                             <RadioGroupItem value={String(slot.id)} className="sr-only" />
                                         </FormControl>
                                         <Label className={cn(
-                                            "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                                            field.value === slot.id && "border-primary"
+                                            "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors",
+                                            field.value === slot.id && "border-primary bg-primary/10 text-primary"
                                         )}>
                                             <p className="font-bold text-lg">{format(parseISO(slot.startsAt), "MMM dd, yyyy")}</p>
                                             <p className="text-sm text-muted-foreground">{getDurationInNightsAndDays(experience.durationMins)}</p>
