@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { useToast } from "@/hooks/use-toast";
-import type { Booking, ExperienceDetail, Slot } from "@/types";
+import type { Booking, Slot } from "@/types";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/context/auth-context";
@@ -123,34 +123,36 @@ export default function MyBookingsPage() {
   const handleCancelBooking = (bookingId: string) => {
     const allBookings = getStoredBookings();
     const bookingToCancel = allBookings.find(b => b.id === bookingId);
-
+  
     if (!bookingToCancel) {
-        toast({ title: "Error", description: "Booking not found.", variant: "destructive" });
-        return;
+      toast({ title: "Error", description: "Booking not found.", variant: "destructive" });
+      return;
     }
-    
-    // Refund the amount
+  
+    // 1. Refund the amount
     addBalance(bookingToCancel.total);
-    
-    // Update slot availability
+  
+    // 2. Update slot availability
     const allSlots = getStoredSlots();
     const slotIndex = allSlots.findIndex(s => s.id === bookingToCancel.slotId);
-    if(slotIndex > -1) {
-        allSlots[slotIndex].remaining += bookingToCancel.numGuests;
-        allSlots[slotIndex].isSoldOut = false;
-        saveStoredSlots(allSlots);
+    if (slotIndex > -1) {
+      allSlots[slotIndex].remaining += bookingToCancel.numGuests;
+      allSlots[slotIndex].isSoldOut = false;
+      saveStoredSlots(allSlots);
     }
-
-    // Filter out the cancelled booking
+  
+    // 3. Create the new list of bookings without the cancelled one
     const updatedBookings = allBookings.filter(b => b.id !== bookingId);
-    saveStoredBookings(updatedBookings);
-
-    // Update the UI state directly
-    setBookings(prevBookings => prevBookings.filter(b => b.id !== bookingId));
     
-    toast({ 
-        title: "Booking Cancelled", 
-        description: `Your booking has been cancelled and ₹${bookingToCancel.total.toFixed(2)} has been refunded to your wallet.` 
+    // 4. Save the new list to storage
+    saveStoredBookings(updatedBookings);
+  
+    // 5. Update the UI state directly
+    setBookings(prevBookings => prevBookings.filter(b => b.id !== bookingId));
+  
+    toast({
+      title: "Booking Cancelled",
+      description: `Your booking has been cancelled and ₹${bookingToCancel.total.toFixed(2)} has been refunded to your wallet.`
     });
   };
 
