@@ -21,7 +21,7 @@ type EnrichedBooking = Booking & {
     slotDate: string;
 };
 
-function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel: (id: string) => void }) {
+function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel: (bookingId: string) => void }) {
     const isCancelled = booking.status === 'CANCELLED';
     return (
         <Card>
@@ -68,7 +68,7 @@ function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel
 }
 
 export default function MyBookingsPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, addBalance } = useAuth();
   const router = useRouter();
   const [bookings, setBookings] = useState<EnrichedBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,12 +120,30 @@ export default function MyBookingsPage() {
 
   const handleCancelBooking = (bookingId: string) => {
     const allBookings = getStoredBookings();
-    const updatedBookings = allBookings.filter(b => b.id !== bookingId);
-    saveStoredBookings(updatedBookings);
+    const bookingIndex = allBookings.findIndex(b => b.id === bookingId);
+
+    if (bookingIndex === -1) {
+        toast({ title: "Error", description: "Booking not found.", variant: "destructive" });
+        return;
+    }
+
+    const bookingToCancel = allBookings[bookingIndex];
+    
+    // Update status to CANCELLED
+    allBookings[bookingIndex].status = 'CANCELLED';
+    saveStoredBookings(allBookings);
+    
+    // Refund the amount
+    addBalance(bookingToCancel.total);
+
     // Re-fetch to update the UI state correctly
     fetchBookings();
-    toast({ title: "Booking Cancelled", description: "Your booking has been successfully cancelled and removed." });
-  }
+    
+    toast({ 
+        title: "Booking Cancelled", 
+        description: `Your booking has been cancelled and ₹${bookingToCancel.total.toFixed(2)} has been refunded to your wallet.` 
+    });
+  };
 
   if (loading || !user) {
     return (
