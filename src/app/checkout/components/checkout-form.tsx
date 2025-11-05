@@ -152,9 +152,6 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
             if (!loadedExperience) {
                 throw new Error("Could not load experience details.");
             }
-             if (slotId && !loadedSlot) {
-                throw new Error("Could not load slot details.");
-            }
 
             setCheckoutData({ experience: loadedExperience, slot: loadedSlot, bookingToEdit });
 
@@ -511,5 +508,3 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
     </Form>
   );
 }
-
-    
