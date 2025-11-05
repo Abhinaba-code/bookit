@@ -464,9 +464,28 @@ export function saveStoredBookings(bookings: Booking[]) {
   localStorage.setItem('bookit_bookings', JSON.stringify(bookings));
 }
 
+// Stubs for request data - will be moved to localStorage
+export function getStoredCallbackRequests(): CallbackRequest[] {
+    if (typeof window === 'undefined') return [];
+    const stored = localStorage.getItem('bookit_callback_requests');
+    return stored ? JSON.parse(stored) : [];
+}
 
-export let callbackRequests: CallbackRequest[] = [];
-export let messageRequests: MessageRequest[] = [];
+export function saveStoredCallbackRequests(requests: CallbackRequest[]) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('bookit_callback_requests', JSON.stringify(requests));
+}
+
+export function getStoredMessageRequests(): MessageRequest[] {
+    if (typeof window === 'undefined') return [];
+    const stored = localStorage.getItem('bookit_message_requests');
+    return stored ? JSON.parse(stored) : [];
+}
+
+export function saveStoredMessageRequests(requests: MessageRequest[]) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('bookit_message_requests', JSON.stringify(requests));
+}
     
 
 

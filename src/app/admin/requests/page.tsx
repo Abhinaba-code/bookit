@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback } from "react";
 import {
   getAllCallbackRequests,
   getAllMessageRequests,
@@ -67,8 +67,9 @@ export default function AdminRequestsPage() {
   }, [user, loading, router]);
 
 
-  const fetchAndSetData = async () => {
+  const fetchAndSetData = useCallback(async () => {
       setIsLoading(true);
+      // Since actions now read from localStorage, they are safe to call on the client.
       const [callbackRes, messageRes] = await Promise.all([
         getAllCallbackRequests(),
         getAllMessageRequests(),
@@ -83,13 +84,13 @@ export default function AdminRequestsPage() {
         setMessageRequests(enriched);
       }
       setIsLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
     if(user) {
         fetchAndSetData();
     }
-  }, [user]);
+  }, [user, fetchAndSetData]);
   
   const handleDeleteCallback = (req: CallbackRequest) => {
     startDeleteTransition(async () => {

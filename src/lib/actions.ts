@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { experiences, slots, callbackRequests, messageRequests, getStoredBookings, saveStoredBookings } from "./data";
+import { experiences, slots, getStoredBookings, saveStoredBookings, getStoredCallbackRequests, saveStoredCallbackRequests, getStoredMessageRequests, saveStoredMessageRequests } from "./data";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
 import type { CallbackRequest, MessageRequest, Booking } from "@/types";
@@ -120,7 +120,11 @@ export async function createCallbackRequest(data: unknown) {
         createdAt: new Date().toISOString(),
         status: "PENDING",
     };
-    callbackRequests.push(newRequest);
+    
+    const allRequests = getStoredCallbackRequests();
+    allRequests.push(newRequest);
+    saveStoredCallbackRequests(allRequests);
+
     revalidatePath('/admin/requests');
     return { success: true, request: newRequest };
 }
@@ -143,24 +147,33 @@ export async function createMessageRequest(data: unknown) {
         createdAt: new Date().toISOString(),
         status: "PENDING",
     };
-    messageRequests.push(newRequest);
+    
+    const allRequests = getStoredMessageRequests();
+    allRequests.push(newRequest);
+    saveStoredMessageRequests(allRequests);
+
     revalidatePath('/admin/requests');
     return { success: true, request: newRequest };
 }
 
 
 export async function getAllCallbackRequests() {
-    return { success: true, requests: [...callbackRequests].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
+    const requests = getStoredCallbackRequests();
+    return { success: true, requests: requests.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
 }
 
 export async function getAllMessageRequests() {
-    return { success: true, requests: [...messageRequests].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
+    const requests = getStoredMessageRequests();
+    return { success: true, requests: requests.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
 }
 
 export async function deleteCallbackRequest(id: string) {
-    const index = callbackRequests.findIndex(r => r.id === id);
-    if (index > -1) {
-        callbackRequests.splice(index, 1);
+    let requests = getStoredCallbackRequests();
+    const initialLength = requests.length;
+    requests = requests.filter(r => r.id !== id);
+    
+    if (requests.length < initialLength) {
+        saveStoredCallbackRequests(requests);
         revalidatePath('/admin/requests');
         return { success: true };
     }
@@ -168,9 +181,12 @@ export async function deleteCallbackRequest(id: string) {
 }
 
 export async function deleteMessageRequest(id: string) {
-    const index = messageRequests.findIndex(r => r.id === id);
-    if (index > -1) {
-        messageRequests.splice(index, 1);
+    let requests = getStoredMessageRequests();
+    const initialLength = requests.length;
+    requests = requests.filter(r => r.id !== id);
+
+    if (requests.length < initialLength) {
+        saveStoredMessageRequests(requests);
         revalidatePath('/admin/requests');
         return { success: true };
     }
@@ -199,16 +215,18 @@ export async function updateCallbackRequest(data: unknown) {
         return { success: false, error: "Invalid input." };
     }
     const { id, ...updateData } = validation.data;
-    const index = callbackRequests.findIndex(r => r.id === id);
+    const requests = getStoredCallbackRequests();
+    const index = requests.findIndex(r => r.id === id);
 
     if (index > -1) {
-        callbackRequests[index] = {
-            ...callbackRequests[index],
+        requests[index] = {
+            ...requests[index],
             ...updateData,
             dateOfTravel: updateData.dateOfTravel.toISOString(),
         };
+        saveStoredCallbackRequests(requests);
         revalidatePath('/admin/requests');
-        return { success: true, request: callbackRequests[index] };
+        return { success: true, request: requests[index] };
     }
     return { success: false, error: "Request not found." };
 }
@@ -227,14 +245,16 @@ export async function updateMessageRequest(data: unknown) {
         return { success: false, error: "Invalid input." };
     }
     const { id, ...updateData } = validation.data;
-    const index = messageRequests.findIndex(r => r.id === id);
+    let requests = getStoredMessageRequests();
+    const index = requests.findIndex(r => r.id === id);
     if (index > -1) {
-         messageRequests[index] = {
-            ...messageRequests[index],
+        requests[index] = {
+            ...requests[index],
             ...updateData,
         };
+        saveStoredMessageRequests(requests);
         revalidatePath('/admin/requests');
-        return { success: true, request: messageRequests[index] };
+        return { success: true, request: requests[index] };
     }
     return { success: false, error: "Request not found." };
 }
