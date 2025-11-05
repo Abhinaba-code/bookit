@@ -88,7 +88,7 @@ const formatInUTC = (date: Date | string, fmt: string) => {
 export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: string, experienceId?: number, slotId?: number }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { user, deductBalance } = useAuth();
+  const { user, deductBalance, addBalance } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -241,10 +241,13 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
         return;
     }
 
-    if (user && user.balance < total) {
+    const { bookingToEdit } = checkoutData;
+    const priceDifference = bookingToEdit ? total - bookingToEdit.total : total;
+
+    if (user && user.balance < priceDifference) {
       toast({
         title: "Insufficient Balance",
-        description: "You do not have enough funds in your wallet. Please add more.",
+        description: `You do not have enough funds to cover the additional cost of ₹${priceDifference.toFixed(2)}.`,
         variant: "destructive",
       });
       return;
@@ -269,7 +272,15 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
 
       if (result.success && result.booking) {
         try {
-            if (!result.isEditing) {
+            if (bookingToEdit) {
+                // Handle balance adjustment on edit
+                if (priceDifference > 0) {
+                    deductBalance(priceDifference);
+                } else if (priceDifference < 0) {
+                    addBalance(Math.abs(priceDifference));
+                }
+            } else {
+                // New booking, deduct full amount
                 deductBalance(total);
             }
             
@@ -289,7 +300,7 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
         } catch (e: any) {
             toast({
                 title: "Payment Failed",
-                description: e.message || "Could not deduct from balance.",
+                description: e.message || "Could not update your balance.",
                 variant: "destructive",
             });
         }
@@ -505,3 +516,5 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
     </Form>
   );
 }
+
+    
