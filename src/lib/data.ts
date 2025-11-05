@@ -133,4 +133,4 @@ export const experiences: ExperienceDetail[] = experiencesData.map((exp, index) 
 
 export const slots: Slot[] = generatedSlots;
 
-export const bookings: Booking[] = [];
+export let bookings: Booking[] = [];
