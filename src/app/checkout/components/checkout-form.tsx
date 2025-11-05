@@ -282,7 +282,18 @@ export function CheckoutForm({
                         <FormField control={form.control} name="firstName" render={({ field }) => (<FormItem><FormLabel>First Name *</FormLabel><FormControl><Input placeholder="John" {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={form.control} name="lastName" render={({ field }) => (<FormItem><FormLabel>Last Name *</FormLabel><FormControl><Input placeholder="Doe" {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email Address *</FormLabel><FormControl><Input placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Phone Number *</FormLabel><FormControl><Input placeholder="+91 12345 67890" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="phone" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Number *</FormLabel>
+                                <FormControl>
+                                    <div className="flex items-center">
+                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-background text-sm text-muted-foreground">+91</span>
+                                        <Input placeholder="12345 67890" className="rounded-l-none" {...field} />
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                          <FormField control={form.control} name="dob" render={({ field }) => (
                             <FormItem className="flex flex-col"><FormLabel>Date of Birth *</FormLabel>
                                 <Popover><PopoverTrigger asChild>
@@ -388,4 +399,5 @@ export function CheckoutForm({
   );
 }
 
+    
     
