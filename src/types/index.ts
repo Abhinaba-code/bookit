@@ -9,6 +9,7 @@ export type ExperienceSummary = {
   imageHint: string;
   rating?: number;
   nextAvailable?: string | null;
+  tags?: string[];
 };
 
 export type Slot = {

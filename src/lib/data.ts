@@ -25,6 +25,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 120,
     rating: 4.8,
+    tags: ["adventure", "indian", "rajasthan"]
   },
   {
     id: 2,
@@ -36,6 +37,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 180,
     rating: 4.9,
+    tags: ["adventure", "beach", "indian", "andaman"]
   },
   {
     id: 3,
@@ -47,6 +49,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 240,
     rating: 4.7,
+    tags: ["safari", "indian", "rajasthan"]
   },
   {
     id: 4,
@@ -58,6 +61,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 480,
     rating: 4.6,
+    tags: ["hiking", "indian", "himachal"]
   },
   {
     id: 5,
@@ -69,6 +73,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 150,
     rating: 4.7,
+    tags: ["adventure", "indian", "kerala"]
   },
   {
     id: 6,
@@ -80,6 +85,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 180,
     rating: 4.9,
+    tags: ["cultural", "indian", "goa"]
   },
   {
     id: 7,
@@ -91,6 +97,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 300,
     rating: 4.8,
+    tags: ["cultural", "explorer", "indian"]
   },
   {
     id: 8,
@@ -102,6 +109,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 120,
     rating: 4.9,
+    tags: ["explorer", "indian", "himachal"]
   },
   {
     id: 9,
@@ -113,6 +121,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 120,
     rating: 4.7,
+    tags: ["cultural", "indian", "kerala"]
   },
   {
     id: 10,
@@ -124,10 +133,11 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 60,
     rating: 4.9,
+    tags: ["adventure", "indian", "himachal"]
   },
   {
     id: 11,
-    title: " houseboat Cruise in Alleppey",
+    title: "Houseboat Cruise in Alleppey",
     slug: "houseboat-cruise-alleppey",
     location: "Alleppey, Kerala",
     description: "Relax on a traditional houseboat as you glide through the tranquil backwaters, enjoying delicious Keralan cuisine.",
@@ -135,6 +145,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 1440,
     rating: 4.8,
+    tags: ["beach", "cultural", "indian", "kerala"]
   },
   {
     id: 12,
@@ -146,6 +157,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 360,
     rating: 4.9,
+    tags: ["hiking", "explorer", "indian"]
   },
   {
     id: 13,
@@ -157,6 +169,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 1200,
     rating: 4.7,
+    tags: ["safari", "cultural", "indian", "rajasthan"]
   },
   {
     id: 14,
@@ -168,6 +181,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 480,
     rating: 4.8,
+    tags: ["adventure", "indian"]
   },
   {
     id: 15,
@@ -179,6 +193,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 420,
     rating: 4.6,
+    tags: ["adventure", "indian", "goa"]
   },
   {
     id: 16,
@@ -190,6 +205,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 5760,
     rating: 4.9,
+    tags: ["hiking", "explorer", "indian"]
   },
   {
     id: 17,
@@ -201,6 +217,7 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 240,
     rating: 4.7,
+    tags: ["safari", "indian"]
   },
   {
     id: 18,
@@ -212,6 +229,55 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
     currency: "INR",
     durationMins: 360,
     rating: 4.6,
+    tags: ["beach", "hiking", "indian"]
+  },
+  {
+    id: 19,
+    title: "African Safari Adventure",
+    slug: "african-safari-adventure",
+    location: "Masai Mara, Kenya",
+    description: "Experience the Great Migration and witness the stunning wildlife of Africa in this unforgettable safari.",
+    price: 15000,
+    currency: "INR",
+    durationMins: 10080,
+    rating: 4.9,
+    tags: ["safari", "adventure", "world", "africa"]
+  },
+  {
+    id: 20,
+    title: "Exploring the Australian Outback",
+    slug: "exploring-australian-outback",
+    location: "Uluru, Australia",
+    description: "Discover the heart of Australia, witness the iconic Uluru, and learn about ancient Aboriginal culture.",
+    price: 12000,
+    currency: "INR",
+    durationMins: 7200,
+    rating: 4.8,
+    tags: ["explorer", "cultural", "world", "australia"]
+  },
+  {
+    id: 21,
+    title: "American Road Trip: Route 66",
+    slug: "american-road-trip-route-66",
+    location: "Chicago to LA, USA",
+    description: "Embark on the ultimate American road trip along the historic Route 66, experiencing classic Americana.",
+    price: 25000,
+    currency: "INR",
+    durationMins: 20160,
+    rating: 4.7,
+    tags: ["explorer", "cultural", "world", "america"]
+  },
+  {
+    id: 22,
+    title: "Trek to Tiger's Nest, Bhutan",
+    slug: "trek-to-tigers-nest-bhutan",
+    location: "Paro, Bhutan",
+    description: "A spiritual and physical journey to the iconic Paro Taktsang (Tiger's Nest) monastery, perched on a cliffside.",
+    price: 8000,
+    currency: "INR",
+    durationMins: 480,
+    rating: 4.9,
+    tags: ["hiking", "cultural", "world", "bhutan"]
   }
 ];
 

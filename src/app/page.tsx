@@ -1,16 +1,9 @@
 import { Suspense } from "react";
 import { getExperiences } from "@/lib/api";
 import { Container } from "@/components/ui/container";
-import { Sidebar } from "@/components/layout/sidebar";
-import { ExperienceList } from "@/components/experience/experience-list";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ExperienceSummary } from "@/types";
-import { ExperienceContainer } from "@/components/experience/experience-container";
+import { HomeContainer } from "@/components/home/home-container";
 
-async function Experiences() {
-  const experiences = await getExperiences();
-  return <ExperienceContainer experiences={experiences} />;
-}
 
 function ExperiencesSkeleton() {
   return (
@@ -33,23 +26,14 @@ function ExperiencesSkeleton() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const experiences = await getExperiences();
+
   return (
     <Container className="py-8">
-      <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-        <Sidebar />
-        <main>
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold font-headline tracking-tight">
-              Adventure Tours
-            </h1>
-            <p className="text-muted-foreground">Embark on a heavenly journey with BookIt Tours. Travel through the most well-known places. Enjoy adventure activities and create unforgettable memories.</p>
-          </div>
-          <Suspense fallback={<ExperiencesSkeleton />}>
-            <Experiences />
-          </Suspense>
-        </main>
-      </div>
+       <Suspense fallback={<ExperiencesSkeleton />}>
+          <HomeContainer experiences={experiences} />
+        </Suspense>
     </Container>
   );
 }

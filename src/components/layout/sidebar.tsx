@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Accordion,
   AccordionContent,
@@ -8,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Button } from "../ui/button";
 
 const categories = [
   { id: "adventure", label: "Adventure" },
@@ -34,13 +35,25 @@ const worldTours = [
     { id: "bhutan", label: "Bhutan" },
 ]
 
-export function Sidebar() {
+type SidebarProps = {
+    selectedCategories: string[];
+    onCategoryChange: (categoryId: string, checked: boolean) => void;
+}
+
+export function Sidebar({ selectedCategories, onCategoryChange }: SidebarProps) {
+
+  const handleCheckboxChange = (id: string) => (checked: boolean | 'indeterminate') => {
+      if (typeof checked === 'boolean') {
+          onCategoryChange(id, checked);
+      }
+  }
+
   return (
     <aside className="hidden lg:block">
         <h2 className="text-lg font-semibold font-headline mb-4">Sort & Filter</h2>
         <Card>
             <CardContent className="p-0">
-            <Accordion type="multiple" defaultValue={["price", "categories", "indianTours"]} className="w-full">
+            <Accordion type="multiple" defaultValue={["price", "categories", "indianTours", "worldTours"]} className="w-full">
                 <AccordionItem value="duration" className="p-4">
                     <AccordionTrigger className="font-semibold py-0">Duration</AccordionTrigger>
                     <AccordionContent className="pt-4 space-y-4">
@@ -66,7 +79,11 @@ export function Sidebar() {
                 <AccordionContent className="space-y-2 pt-2">
                     {indianTours.map((category) => (
                     <div key={category.id} className="flex items-center space-x-2">
-                        <Checkbox id={category.id} />
+                        <Checkbox 
+                            id={category.id} 
+                            checked={selectedCategories.includes(category.id)}
+                            onCheckedChange={handleCheckboxChange(category.id)}
+                        />
                         <Label htmlFor={category.id} className="font-normal">
                         {category.label}
                         </Label>
@@ -79,7 +96,11 @@ export function Sidebar() {
                 <AccordionContent className="space-y-2 pt-2">
                     {worldTours.map((category) => (
                     <div key={category.id} className="flex items-center space-x-2">
-                        <Checkbox id={category.id} />
+                        <Checkbox 
+                            id={category.id} 
+                            checked={selectedCategories.includes(category.id)}
+                            onCheckedChange={handleCheckboxChange(category.id)}
+                        />
                         <Label htmlFor={category.id} className="font-normal">
                         {category.label}
                         </Label>
@@ -92,7 +113,11 @@ export function Sidebar() {
                 <AccordionContent className="space-y-2 pt-2">
                     {categories.map((category) => (
                     <div key={category.id} className="flex items-center space-x-2">
-                        <Checkbox id={category.id} />
+                        <Checkbox 
+                            id={category.id} 
+                            checked={selectedCategories.includes(category.id)}
+                            onCheckedChange={handleCheckboxChange(category.id)}
+                        />
                         <Label htmlFor={category.id} className="font-normal">
                         {category.label}
                         </Label>
