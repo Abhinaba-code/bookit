@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,7 +38,6 @@ import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from 'date-fns-tz';
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   slotId: z.coerce.number().int().positive({ message: "Please select a date." }),
@@ -70,8 +68,6 @@ const getDurationInNightsAndDays = (durationInMinutes: number): string => {
 
 const formatInUTC = (date: Date | string, fmt: string) => {
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  // The date is already in UTC from the server, we just need to format it in UTC.
-  // toZonedTime helps ensure that the date object is treated as UTC before formatting.
   const zonedDate = toZonedTime(dateObj, 'UTC');
   return format(zonedDate, fmt, { timeZone: 'UTC' });
 };
@@ -117,6 +113,10 @@ export function CheckoutForm({
   const numGuests = Number(adults) + Number(children) + Number(infants);
   const selectedSlotId = form.watch("slotId");
   const selectedSlot = experience.slots.find(s => s.id === selectedSlotId);
+  
+  const handleSlotSelect = (slotId: number) => {
+    form.setValue('slotId', slotId, { shouldValidate: true });
+  };
 
   useEffect(() => {
     const newSubtotal = experience.price * numGuests;
@@ -198,21 +198,20 @@ export function CheckoutForm({
                     <FormField
                         control={form.control}
                         name="slotId"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3">
+                        render={() => (
+                            <FormItem>
                                 <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        value={field.value ? String(field.value) : ""}
-                                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                                    >
-                                    {experience.slots.filter(s => !s.isSoldOut).map((slot) => (
-                                        <div key={slot.id}>
-                                            <RadioGroupItem value={String(slot.id)} id={String(slot.id)} className="sr-only" />
-                                            <Label htmlFor={String(slot.id)} className={cn(
-                                                "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors",
-                                                field.value === slot.id && "border-primary bg-primary/10 text-primary"
-                                            )}>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {experience.slots.filter(s => !s.isSoldOut).map((slot) => (
+                                            <button
+                                                type="button"
+                                                key={slot.id}
+                                                onClick={() => handleSlotSelect(slot.id)}
+                                                className={cn(
+                                                    "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors text-left",
+                                                    selectedSlotId === slot.id && "border-primary bg-primary/10 text-primary"
+                                                )}
+                                            >
                                                 <p className="font-bold text-lg">{formatInUTC(slot.startsAt, "MMM dd, yyyy")}</p>
                                                 <p className="text-sm text-muted-foreground">{getDurationInNightsAndDays(experience.durationMins)}</p>
                                                 <Separator className="my-2" />
@@ -220,12 +219,11 @@ export function CheckoutForm({
                                                 <p className="font-semibold">₹{experience.price.toLocaleString()}</p>
                                                 <Separator className="my-2" />
                                                 <p className="text-xs font-bold text-green-600">{slot.remaining} Seats Available</p>
-                                            </Label>
-                                        </div>
-                                    ))}
-                                    </RadioGroup>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </FormControl>
-                                 <FormMessage />
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
@@ -363,4 +361,4 @@ export function CheckoutForm({
     </Form>
   );
 }
-
+    
