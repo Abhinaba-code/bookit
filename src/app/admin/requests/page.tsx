@@ -9,7 +9,7 @@ import {
   deleteMessageRequest,
 } from "@/lib/actions";
 import { getExperienceById } from "@/lib/api";
-import type { CallbackRequest, MessageRequest, ExperienceSummary } from "@/types";
+import type { CallbackRequest, MessageRequest } from "@/types";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { EditRequestDialog } from "./components/edit-request-dialog";
 
 type EnrichedCallbackRequest = CallbackRequest & { experienceTitle?: string };
 type EnrichedMessageRequest = MessageRequest & { experienceTitle?: string };
@@ -34,11 +35,14 @@ type EnrichedMessageRequest = MessageRequest & { experienceTitle?: string };
 async function enrichRequests<T extends CallbackRequest | MessageRequest>(requests: T[]): Promise<(T & { experienceTitle?: string })[]> {
     const enriched = await Promise.all(
         requests.map(async (req) => {
-            const experience = await getExperienceById(req.experienceId);
-            return {
-                ...req,
-                experienceTitle: experience?.title,
-            };
+            if (!req.experienceId) return { ...req, experienceTitle: 'N/A' };
+            try {
+                const experience = await getExperienceById(req.experienceId);
+                return { ...req, experienceTitle: experience?.title };
+            } catch (error) {
+                console.error(`Failed to fetch experience for request ${req.id}:`, error);
+                return { ...req, experienceTitle: 'Experience not found' };
+            }
         })
     );
     return enriched;
@@ -51,8 +55,7 @@ export default function AdminRequestsPage() {
   const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchData() {
+  const fetchAndSetData = async () => {
       setIsLoading(true);
       const [callbackRes, messageRes] = await Promise.all([
         getAllCallbackRequests(),
@@ -68,8 +71,10 @@ export default function AdminRequestsPage() {
         setMessageRequests(enriched);
       }
       setIsLoading(false);
-    }
-    fetchData();
+  }
+
+  useEffect(() => {
+    fetchAndSetData();
   }, []);
   
   const handleDeleteCallback = (id: string) => {
@@ -96,6 +101,9 @@ export default function AdminRequestsPage() {
     });
   }
 
+  const handleUpdate = () => {
+    fetchAndSetData(); // Refetch all data to ensure UI is up-to-date
+  }
 
   return (
     <Container className="py-12">
@@ -133,9 +141,11 @@ export default function AdminRequestsPage() {
                                     <p><strong>Status:</strong> <span className="font-semibold">{req.status}</span></p>
                                 </CardContent>
                                 <CardFooter className="gap-2">
-                                     <Button variant="outline" size="sm" onClick={() => toast({ title: "Edit action is not implemented."})}>
-                                        <Edit className="mr-2 h-4 w-4" /> Edit
-                                    </Button>
+                                     <EditRequestDialog request={req} type="callback" onUpdate={handleUpdate}>
+                                        <Button variant="outline" size="sm">
+                                            <Edit className="mr-2 h-4 w-4" /> Edit
+                                        </Button>
+                                    </EditRequestDialog>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                             <Button variant="destructive" size="sm" disabled={isDeleting}>
@@ -178,9 +188,11 @@ export default function AdminRequestsPage() {
                                     <p><strong>Status:</strong> <span className="font-semibold">{req.status}</span></p>
                                 </CardContent>
                                 <CardFooter className="gap-2">
-                                     <Button variant="outline" size="sm" onClick={() => toast({ title: "Edit action is not implemented."})}>
-                                        <Edit className="mr-2 h-4 w-4" /> Edit
-                                    </Button>
+                                    <EditRequestDialog request={req} type="message" onUpdate={handleUpdate}>
+                                        <Button variant="outline" size="sm">
+                                            <Edit className="mr-2 h-4 w-4" /> Edit
+                                        </Button>
+                                    </EditRequestDialog>
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                              <Button variant="destructive" size="sm" disabled={isDeleting}>

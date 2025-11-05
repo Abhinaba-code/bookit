@@ -176,3 +176,43 @@ export async function deleteMessageRequest(id: string) {
     }
     return { success: false, error: "Request not found." };
 }
+
+const updateCallbackStatusSchema = z.object({
+    id: z.string(),
+    status: z.enum(["PENDING", "CONTACTED", "CLOSED"]),
+});
+
+export async function updateCallbackRequest(data: unknown) {
+    const validation = updateCallbackStatusSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Invalid input." };
+    }
+    const { id, status } = validation.data;
+    const index = callbackRequests.findIndex(r => r.id === id);
+    if (index > -1) {
+        callbackRequests[index].status = status;
+        revalidatePath('/admin/requests');
+        return { success: true, request: callbackRequests[index] };
+    }
+    return { success: false, error: "Request not found." };
+}
+
+const updateMessageStatusSchema = z.object({
+    id: z.string(),
+    status: z.enum(["PENDING", "SENT", "CLOSED"]),
+});
+
+export async function updateMessageRequest(data: unknown) {
+    const validation = updateMessageStatusSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Invalid input." };
+    }
+    const { id, status } = validation.data;
+    const index = messageRequests.findIndex(r => r.id === id);
+    if (index > -1) {
+        messageRequests[index].status = status;
+        revalidatePath('/admin/requests');
+        return { success: true, request: messageRequests[index] };
+    }
+    return { success: false, error: "Request not found." };
+}
