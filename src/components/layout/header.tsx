@@ -40,7 +40,7 @@ export function Header() {
                 My Bookings
               </Link>
               <Link href="/admin/requests" className="text-muted-foreground hover:text-primary transition-colors">
-                Admin
+                Admin Requests
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
