@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import type { ExperienceDetail, Slot as SlotType } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock, Users, IndianRupee } from "lucide-react";
+import { Star, MapPin, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
