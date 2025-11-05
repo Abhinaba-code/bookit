@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createCallbackRequest } from "@/lib/actions";
+import { getStoredCallbackRequests, saveStoredCallbackRequests } from "@/lib/data";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,7 +83,11 @@ export function RequestCallbackDialog({
     startTransition(async () => {
         const result = await createCallbackRequest({ ...values, experienceId: experience.id });
 
-        if (result.success) {
+        if (result.success && result.request) {
+            // Client-side save
+            const existingRequests = getStoredCallbackRequests();
+            saveStoredCallbackRequests([...existingRequests, result.request]);
+
             toast({
                 title: "Enquiry Sent!",
                 description: "Our team will get back to you shortly.",

@@ -2,15 +2,16 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validatePromoCode } from "@/ai/flows/validate-promo-code";
 import { createBooking } from "@/lib/actions";
 import { getStoredBookings, saveStoredBookings } from "@/lib/data";
+import { getExperienceById, getSlotById } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import type { ExperienceDetail, Slot } from "@/types";
+import type { ExperienceDetail, Slot, Booking } from "@/types";
 import { useAuth } from "@/context/auth-context";
 
 import { Button } from "@/components/ui/button";
@@ -40,8 +41,11 @@ import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { toZonedTime } from 'date-fns-tz';
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
+// Updated form schema to match the server action
 const formSchema = z.object({
+  id: z.string().optional(),
   slotId: z.coerce.number().int().positive({ message: "Please select a date." }),
   adults: z.coerce.number().int().min(1, { message: "At least one adult is required."}),
   children: z.coerce.number().int().min(0),
@@ -59,6 +63,12 @@ const formSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof formSchema>;
 
+type CheckoutData = {
+    experience: ExperienceDetail;
+    slot: Slot | undefined; // Slot can be undefined initially for a new booking
+    bookingToEdit?: Booking;
+}
+
 const getDurationInNightsAndDays = (durationInMinutes: number): string => {
     const days = Math.ceil(durationInMinutes / (60 * 24));
     const nights = days - 1;
@@ -75,19 +85,16 @@ const formatInUTC = (date: Date | string, fmt: string) => {
 };
 
 
-export function CheckoutForm({
-  experience,
-  initialSlot,
-}: {
-  experience: ExperienceDetail;
-  initialSlot?: Slot;
-}) {
+export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   const router = useRouter();
   const { toast } = useToast();
   const { user, deductBalance } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
+  
   const [subtotal, setSubtotal] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
@@ -95,7 +102,8 @@ export function CheckoutForm({
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      slotId: initialSlot?.id,
+      id: undefined,
+      slotId: undefined,
       adults: 1,
       children: 0,
       infants: 0,
@@ -110,22 +118,102 @@ export function CheckoutForm({
     },
   });
 
+  useEffect(() => {
+    async function loadData() {
+        setIsLoading(true);
+        const bookingId = searchParams.bookingId as string | undefined;
+        const experienceId = searchParams.experienceId ? Number(searchParams.experienceId) : undefined;
+        const slotId = searchParams.slotId ? Number(searchParams.slotId) : undefined;
+
+        let bookingToEdit: Booking | undefined;
+        let loadedExperience: ExperienceDetail | null = null;
+        let loadedSlot: Slot | undefined;
+
+        try {
+            if (bookingId) {
+                // EDITING a booking
+                const bookings = getStoredBookings();
+                bookingToEdit = bookings.find((b) => b.id === bookingId);
+                if (!bookingToEdit) throw new Error("Booking not found.");
+                
+                loadedExperience = await getExperienceById(bookingToEdit.experienceId);
+                loadedSlot = await getSlotById(bookingToEdit.slotId) || undefined;
+
+            } else if (experienceId) {
+                // CREATING a new booking
+                loadedExperience = await getExperienceById(experienceId);
+                if (slotId) {
+                    loadedSlot = await getSlotById(slotId) || undefined;
+                }
+            } else {
+                throw new Error("No valid parameters provided.");
+            }
+
+            if (!loadedExperience) {
+                throw new Error("Could not load experience details.");
+            }
+             if (slotId && !loadedSlot) {
+                throw new Error("Could not load slot details.");
+            }
+
+            setCheckoutData({ experience: loadedExperience, slot: loadedSlot, bookingToEdit });
+
+            // Pre-fill form if editing
+            if (bookingToEdit) {
+                const nameParts = bookingToEdit.name.split(' ');
+                const title = nameParts[0];
+                const firstName = nameParts[1];
+                const lastName = nameParts.slice(2).join(' ');
+
+                form.reset({
+                    id: bookingToEdit.id,
+                    slotId: bookingToEdit.slotId,
+                    adults: bookingToEdit.numGuests, // Simplified; needs guest breakdown
+                    children: 0,
+                    infants: 0,
+                    title: title,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: bookingToEdit.email,
+                    phone: bookingToEdit.phone,
+                    dob: parseISO(bookingToEdit.dob),
+                    gender: bookingToEdit.gender,
+                    promoCode: bookingToEdit.promoCode || "",
+                    agreedToTerms: true, // Assume they agreed before
+                });
+            } else if (loadedSlot) {
+                 form.setValue('slotId', loadedSlot.id);
+            }
+
+        } catch (error: any) {
+            toast({ title: "Error", description: error.message, variant: "destructive" });
+            router.push('/dashboard');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    loadData();
+  }, [searchParams, form, router, toast]);
+
+
   const adults = form.watch("adults");
   const children = form.watch("children");
   const infants = form.watch("infants");
   const numGuests = Number(adults) + Number(children) + Number(infants);
   const selectedSlotId = form.watch("slotId");
-  const selectedSlot = experience.slots.find(s => s.id === selectedSlotId);
+  const selectedSlot = checkoutData?.experience.slots.find(s => s.id === selectedSlotId);
   
   const handleSlotSelect = (slotId: number) => {
     form.setValue('slotId', slotId, { shouldValidate: true });
   };
 
   useEffect(() => {
-    const newSubtotal = experience.price * numGuests;
-    setSubtotal(newSubtotal);
-    setTotal(newSubtotal - discount);
-  }, [numGuests, experience.price, discount]);
+    if (checkoutData?.experience) {
+        const newSubtotal = checkoutData.experience.price * numGuests;
+        setSubtotal(newSubtotal);
+        setTotal(newSubtotal - discount);
+    }
+  }, [numGuests, checkoutData?.experience, discount]);
 
   const handleApplyPromo = async () => {
     const code = form.getValues("promoCode");
@@ -154,7 +242,7 @@ export function CheckoutForm({
   };
 
   const onSubmit = (values: CheckoutFormValues) => {
-    if (!selectedSlot) {
+    if (!checkoutData || !selectedSlot) {
         toast({ title: "Please select a date and time.", variant: "destructive" });
         return;
     }
@@ -170,13 +258,11 @@ export function CheckoutForm({
 
     startTransition(async () => {
       const bookingData = {
-        experienceId: experience.id,
-        slotId: values.slotId,
+        ...values,
+        id: checkoutData.bookingToEdit?.id,
+        experienceId: checkoutData.experience.id,
         name: `${values.title} ${values.firstName} ${values.lastName}`,
-        email: values.email,
-        phone: values.phone,
         numGuests: numGuests,
-        promoCode: values.promoCode,
         total,
         subtotal,
         discount,
@@ -186,11 +272,19 @@ export function CheckoutForm({
 
       if (result.success && result.booking) {
         try {
-            deductBalance(total);
+            if (!result.isEditing) {
+                deductBalance(total);
+            }
             
-            // Save booking to localStorage on the client
             const existingBookings = getStoredBookings();
-            saveStoredBookings([...existingBookings, result.booking]);
+            let updatedBookings;
+
+            if (result.isEditing) {
+                updatedBookings = existingBookings.map(b => b.id === result.booking!.id ? result.booking! : b);
+            } else {
+                updatedBookings = [...existingBookings, result.booking];
+            }
+            saveStoredBookings(updatedBookings);
 
             router.push(
                 `/result?bookingId=${result.booking.id}&code=${result.confirmationCode}&total=${result.total}`
@@ -211,6 +305,22 @@ export function CheckoutForm({
       }
     });
   };
+
+  if (isLoading || !checkoutData) {
+      return (
+        <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-96 w-full" />
+            </div>
+            <div className="lg:col-span-1">
+                <Skeleton className="h-96 w-full" />
+            </div>
+        </div>
+      );
+  }
+
+  const { experience } = checkoutData;
 
   return (
     <Form {...form}>
@@ -389,7 +499,7 @@ export function CheckoutForm({
                 />
               <Button type="submit" size="lg" className="w-full" disabled={isPending || !user}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {user ? "Pay with Wallet" : "Login to Book"}
+                {user ? (checkoutData.bookingToEdit ? "Update Booking" : "Pay with Wallet") : "Login to Book"}
               </Button>
             </CardContent>
           </Card>
@@ -398,6 +508,3 @@ export function CheckoutForm({
     </Form>
   );
 }
-
-    
-    

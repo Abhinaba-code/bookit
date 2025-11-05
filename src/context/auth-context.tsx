@@ -35,11 +35,11 @@ const getInitialSentRequests = (): SentRequests => {
     if (typeof window === 'undefined') {
         return { callback: [], message: [] };
     }
-    const stored = localStorage.getItem('bookit_all_sent_requests');
+    const stored = sessionStorage.getItem('bookit_all_sent_requests');
     try {
         if(stored) return JSON.parse(stored);
     } catch(e) {
-        console.error("Failed to parse sent requests from localStorage", e);
+        console.error("Failed to parse sent requests from sessionStorage", e);
     }
     return { callback: [], message: [] };
 }
@@ -51,8 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [sentRequests, setSentRequests] = useState<SentRequests>(getInitialSentRequests);
 
   useEffect(() => {
-    // Check local storage for user session
-    const storedUser = localStorage.getItem('bookit_user');
+    // Check session storage for user session
+    const storedUser = sessionStorage.getItem('bookit_user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser({ ...parsedUser, balance: Number(parsedUser.balance) || 0 });
@@ -62,13 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateUserInStorage = (userObj: User) => {
-    const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const storedUsers: UserWithPassword[] = JSON.parse(sessionStorage.getItem('bookit_users') || '[]');
     const userIndex = storedUsers.findIndex(u => u.email === userObj.email);
     if(userIndex > -1) {
       storedUsers[userIndex] = { ...storedUsers[userIndex], ...userObj };
-      localStorage.setItem('bookit_users', JSON.stringify(storedUsers));
+      sessionStorage.setItem('bookit_users', JSON.stringify(storedUsers));
     }
-    localStorage.setItem('bookit_user', JSON.stringify(userObj));
+    sessionStorage.setItem('bookit_user', JSON.stringify(userObj));
     setUser(userObj);
   }
 
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = (email: string, pass: string) => {
-    const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const storedUsers: UserWithPassword[] = JSON.parse(sessionStorage.getItem('bookit_users') || '[]');
     const foundUser = storedUsers.find((u: any) => u.email === email && u.password === pass);
 
     if (foundUser) {
@@ -99,14 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure balance is a number
       const fullUser = { ...userToStore, balance: Number(userToStore.balance) || 0 };
       setUser(fullUser);
-      localStorage.setItem('bookit_user', JSON.stringify(fullUser));
+      sessionStorage.setItem('bookit_user', JSON.stringify(fullUser));
     } else {
       throw new Error('Invalid email or password');
     }
   };
 
   const signup = (name: string, email: string, pass: string) => {
-    const storedUsers = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const storedUsers = JSON.parse(sessionStorage.getItem('bookit_users') || '[]');
     const existingUser = storedUsers.find((u: any) => u.email === email);
 
     if (existingUser) {
@@ -115,15 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     const newUser: UserWithPassword = { name, email, password: pass, balance: 10000 }; // Start with 10000 fake money
     const updatedUsers = [...storedUsers, newUser];
-    localStorage.setItem('bookit_users', JSON.stringify(updatedUsers));
+    sessionStorage.setItem('bookit_users', JSON.stringify(updatedUsers));
     
     const { password, ...userToStore } = newUser;
     setUser(userToStore);
-    localStorage.setItem('bookit_user', JSON.stringify(userToStore));
+    sessionStorage.setItem('bookit_user', JSON.stringify(userToStore));
   };
 
   const updateUser = (currentEmail: string, updates: Partial<UserWithPassword>) => {
-    const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const storedUsers: UserWithPassword[] = JSON.parse(sessionStorage.getItem('bookit_users') || '[]');
     const userIndex = storedUsers.findIndex(u => u.email === currentEmail);
 
     if (userIndex === -1) {
@@ -150,12 +150,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // oldPassword is not part of the user model, so don't save it
     delete updatedUser.oldPassword;
     storedUsers[userIndex] = updatedUser;
-    localStorage.setItem('bookit_users', JSON.stringify(storedUsers));
+    sessionStorage.setItem('bookit_users', JSON.stringify(storedUsers));
     
     // Update the current session user
     const { password, ...userToStore } = updatedUser;
     setUser({ ...userToStore, balance: Number(userToStore.balance) || 0});
-    localStorage.setItem('bookit_user', JSON.stringify(userToStore));
+    sessionStorage.setItem('bookit_user', JSON.stringify(userToStore));
 
     // If email was changed, we need to update sent requests as well
     if (updates.email && updates.email !== currentEmail) {
@@ -167,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         newRequests.message.forEach(req => {
           if (req.email === currentEmail) req.email = updates.email!;
         });
-        localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
+        sessionStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
         return newRequests;
       });
     }
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('bookit_user');
+    sessionStorage.removeItem('bookit_user');
   };
   
   const addSentRequest = useCallback((type: 'callback' | 'message', experienceId: number, userEmail: string) => {
@@ -185,7 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (!alreadyExists) {
             newRequests[type] = [...newRequests[type], { experienceId, email: userEmail }];
-            localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
+            sessionStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
         }
         return newRequests;
     });
@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasSentRequest = useCallback((type: 'callback' | 'message', experienceId: number): boolean => {
     if (!user) return false;
-    // This check should be based on the local state which is loaded from localStorage.
+    // This check should be based on the local state which is loaded from sessionStorage.
     return sentRequests[type].some(req => req.experienceId === experienceId && req.email === user.email);
   }, [user, sentRequests]);
 
@@ -212,5 +212,3 @@ export function useAuth() {
   }
   return context;
 }
-
-    

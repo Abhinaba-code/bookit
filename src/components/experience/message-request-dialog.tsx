@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { ExperienceSummary } from "@/types";
 import { Loader2 } from "lucide-react";
 import { createMessageRequest } from "@/lib/actions";
+import { getStoredMessageRequests, saveStoredMessageRequests } from "@/lib/data";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +68,11 @@ export function MessageRequestDialog({
     startTransition(async () => {
         const result = await createMessageRequest({ ...values, experienceId: experience.id });
 
-        if (result.success) {
+        if (result.success && result.request) {
+            // Client-side save
+            const existingRequests = getStoredMessageRequests();
+            saveStoredMessageRequests([...existingRequests, result.request]);
+            
             toast({
                 title: "Request Sent!",
                 description: "You will receive the details via message shortly.",

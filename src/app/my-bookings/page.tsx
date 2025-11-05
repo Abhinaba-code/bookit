@@ -55,8 +55,8 @@ function BookingCard({ booking, onCancel }: { booking: EnrichedBooking, onCancel
                     <p className="text-muted-foreground font-semibold">{booking.status}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                    <Button asChild variant="outline" className="w-full" disabled={isCancelled}>
-                        <Link href={`/checkout?experienceId=${booking.experienceId}&slotId=${booking.slotId}`}>Edit Booking</Link>
+                     <Button asChild variant="outline" className="w-full" disabled={isCancelled}>
+                        <Link href={`/checkout?bookingId=${booking.id}`}>Edit Booking</Link>
                     </Button>
                     <Button variant="destructive" className="w-full" onClick={() => onCancel(booking.id)} disabled={isCancelled}>
                         {isCancelled ? 'Booking Cancelled' : 'Cancel Booking'}

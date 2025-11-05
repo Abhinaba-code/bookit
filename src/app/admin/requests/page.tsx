@@ -2,12 +2,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import {
-  deleteCallbackRequest,
-  deleteMessageRequest,
-} from "@/lib/actions";
-import { getStoredCallbackRequests, getStoredMessageRequests } from "@/lib/data";
-import { getExperienceById } from "@/lib/api";
+import { getStoredCallbackRequests, saveStoredCallbackRequests, getStoredMessageRequests, saveStoredMessageRequests } from "@/lib/data";
 import type { CallbackRequest, MessageRequest } from "@/types";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -34,29 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 type EnrichedCallbackRequest = CallbackRequest & { experienceTitle?: string };
 type EnrichedMessageRequest = MessageRequest & { experienceTitle?: string };
 
-// This function runs on the server and cannot be used directly with client-side data.
-// We will simplify for now and add enrichment back carefully later if needed.
-async function enrichRequests<T extends CallbackRequest | MessageRequest>(requests: T[]): Promise<(T & { experienceTitle?: string })[]> {
-    const enriched = await Promise.all(
-        requests.map(async (req) => {
-            if (!req.experienceId) return { ...req, experienceTitle: 'N/A' };
-            try {
-                // This is a server action, which was causing the issue.
-                // We are temporarily replacing it with the ID.
-                const experience = await getExperienceById(req.experienceId);
-                return { ...req, experienceTitle: experience?.title || `ID: ${req.experienceId}` };
-            } catch (error) {
-                console.error(`Failed to fetch experience for request ${req.id}:`, error);
-                return { ...req, experienceTitle: `ID: ${req.experienceId}` };
-            }
-        })
-    );
-    return enriched;
-}
-
-
 export default function AdminRequestsPage() {
-  const { user, loading, addSentRequest } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [callbackRequests, setCallbackRequests] = useState<EnrichedCallbackRequest[]>([]);
   const [messageRequests, setMessageRequests] = useState<EnrichedMessageRequest[]>([]);
@@ -64,9 +38,9 @@ export default function AdminRequestsPage() {
   const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
 
-  const fetchAndSetData = async () => {
+  const fetchAndSetData = () => {
     setIsLoading(true);
-    // Directly use localStorage-accessing functions on the client
+    // Directly use sessionStorage-accessing functions on the client
     const callbackReqs = getStoredCallbackRequests();
     const messageReqs = getStoredMessageRequests();
     
@@ -90,25 +64,33 @@ export default function AdminRequestsPage() {
   }, [user, loading, router]);
   
   const handleDeleteCallback = (req: CallbackRequest) => {
-    startDeleteTransition(async () => {
-        const result = await deleteCallbackRequest(req.id);
-        if (result.success) {
+    startDeleteTransition(() => {
+        let requests = getStoredCallbackRequests();
+        const initialLength = requests.length;
+        requests = requests.filter(r => r.id !== req.id);
+        
+        if (requests.length < initialLength) {
+            saveStoredCallbackRequests(requests);
             fetchAndSetData(); // Refetch after deleting
             toast({ title: "Success", description: "Callback request deleted." });
         } else {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast({ title: "Error", description: "Could not delete request.", variant: "destructive" });
         }
     });
   }
 
   const handleDeleteMessage = (req: MessageRequest) => {
-    startDeleteTransition(async () => {
-        const result = await deleteMessageRequest(req.id);
-        if (result.success) {
+    startDeleteTransition(() => {
+        let requests = getStoredMessageRequests();
+        const initialLength = requests.length;
+        requests = requests.filter(r => r.id !== req.id);
+
+        if (requests.length < initialLength) {
+            saveStoredMessageRequests(requests);
             fetchAndSetData(); // Refetch after deleting
             toast({ title: "Success", description: "Message request deleted." });
         } else {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast({ title: "Error", description: "Could not delete request.", variant: "destructive" });
         }
     });
   }

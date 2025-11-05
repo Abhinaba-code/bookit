@@ -1,10 +1,8 @@
 
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import { getExperienceById, getSlotById } from "@/lib/api";
 import { Container } from "@/components/ui/container";
 import { CheckoutForm } from "./components/checkout-form";
-import type { ExperienceDetail } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -14,32 +12,22 @@ export const metadata = {
   title: "Checkout | BookIt",
 };
 
-async function CheckoutPageContent({ searchParams }: Props) {
-  const experienceId = Number(searchParams.experienceId);
-  const slotId = searchParams.slotId ? Number(searchParams.slotId) : undefined;
-
-  if (!experienceId) {
-    notFound();
-  }
-
-  const experience = await getExperienceById(experienceId);
-
-  if (!experience) {
-    notFound();
-  }
-
-  const slot = slotId ? await getSlotById(slotId) : undefined;
-
-  // If a slotId is provided, but it's not valid or doesn't belong to the experience, it's a bad request.
-  if (slotId && (!slot || slot.experienceId !== experience.id || slot.isSoldOut)) {
-    notFound();
-  }
-  
-  // If a slot is pre-selected, we pass it. If not, the form will handle slot selection.
-  return <CheckoutForm experience={experience} initialSlot={slot} />;
+function CheckoutSkeleton() {
+  return (
+    <div className="grid lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-6">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+      <div className="lg:col-span-1">
+        <Skeleton className="h-96 w-full" />
+      </div>
+    </div>
+  );
 }
 
 export default function CheckoutPage({ searchParams }: Props) {
+  // All logic is now moved to the client component to safely access sessionStorage
   return (
     <Container className="py-12">
       <div className="max-w-6xl mx-auto">
@@ -51,8 +39,8 @@ export default function CheckoutPage({ searchParams }: Props) {
                 You're just a few steps away from your next adventure.
             </p>
         </div>
-        <Suspense fallback={<div>Loading checkout...</div>}>
-            <CheckoutPageContent searchParams={searchParams} />
+        <Suspense fallback={<CheckoutSkeleton />}>
+            <CheckoutForm searchParams={searchParams} />
         </Suspense>
       </div>
     </Container>

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { updateCallbackRequest, updateMessageRequest } from "@/lib/actions";
+import { getStoredCallbackRequests, saveStoredCallbackRequests, getStoredMessageRequests, saveStoredMessageRequests } from "@/lib/data";
 import type { CallbackRequest, MessageRequest } from "@/types";
 import { Loader2, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -90,15 +91,31 @@ export function EditRequestDialog({
   const onSubmit = (values: EditRequestFormValues) => {
     startTransition(async () => {
       const updateData = { id: request.id, ...values };
-      let result;
-
+      let actionResult;
+      
       if (isCallback) {
-        result = await updateCallbackRequest(updateData as any);
+        actionResult = await updateCallbackRequest(updateData as any);
       } else {
-        result = await updateMessageRequest(updateData as any);
+        actionResult = await updateMessageRequest(updateData as any);
       }
 
-      if (result.success) {
+      if (actionResult.success && actionResult.request) {
+        if(isCallback) {
+          const requests = getStoredCallbackRequests();
+          const index = requests.findIndex(r => r.id === request.id);
+          if (index > -1) {
+            requests[index] = actionResult.request as CallbackRequest;
+            saveStoredCallbackRequests(requests);
+          }
+        } else {
+          const requests = getStoredMessageRequests();
+          const index = requests.findIndex(r => r.id === request.id);
+          if (index > -1) {
+            requests[index] = actionResult.request as MessageRequest;
+            saveStoredMessageRequests(requests);
+          }
+        }
+
         toast({
           title: "Request Updated!",
           description: "The request has been successfully updated.",
@@ -108,7 +125,7 @@ export function EditRequestDialog({
       } else {
         toast({
           title: "Error",
-          description: result.error || "Could not update request.",
+          description: actionResult.error || "Could not update request.",
           variant: "destructive",
         });
       }

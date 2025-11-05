@@ -452,41 +452,42 @@ export const experiences: ExperienceDetail[] = experiencesData.map((exp, index) 
 
 export const slots: Slot[] = generatedSlots;
 
-// Use functions to get/set from localStorage to ensure it's only called on the client
+// Use functions to get/set from sessionStorage to ensure it's only called on the client
 export function getStoredBookings(): Booking[] {
   if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem('bookit_bookings');
+  const stored = sessionStorage.getItem('bookit_bookings');
   return stored ? JSON.parse(stored) : [];
 }
 
 export function saveStoredBookings(bookings: Booking[]) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('bookit_bookings', JSON.stringify(bookings));
+  sessionStorage.setItem('bookit_bookings', JSON.stringify(bookings));
 }
 
-// Stubs for request data - will be moved to localStorage
+// Stubs for request data - will be moved to sessionStorage
 export function getStoredCallbackRequests(): CallbackRequest[] {
     if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem('bookit_callback_requests');
+    const stored = sessionStorage.getItem('bookit_callback_requests');
     return stored ? JSON.parse(stored) : [];
 }
 
 export function saveStoredCallbackRequests(requests: CallbackRequest[]) {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('bookit_callback_requests', JSON.stringify(requests));
+    sessionStorage.setItem('bookit_callback_requests', JSON.stringify(requests));
 }
 
 export function getStoredMessageRequests(): MessageRequest[] {
     if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem('bookit_message_requests');
+    const stored = sessionStorage.getItem('bookit_message_requests');
     return stored ? JSON.parse(stored) : [];
 }
 
 export function saveStoredMessageRequests(requests: MessageRequest[]) {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('bookit_message_requests', JSON.stringify(requests));
+    sessionStorage.setItem('bookit_message_requests', JSON.stringify(requests));
 }
     
 
 
     
+
