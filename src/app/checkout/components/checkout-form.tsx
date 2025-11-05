@@ -193,12 +193,14 @@ export function CheckoutForm({
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
-                                        defaultValue={String(field.value)}
+                                        value={String(field.value)}
                                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                                     >
                                     {experience.slots.filter(s => !s.isSoldOut).map((slot) => (
-                                        <div key={slot.id}>
-                                            <RadioGroupItem value={String(slot.id)} id={String(slot.id)} className="sr-only" />
+                                        <FormItem key={slot.id}>
+                                            <FormControl>
+                                                <RadioGroupItem value={String(slot.id)} id={String(slot.id)} className="sr-only" />
+                                            </FormControl>
                                             <Label htmlFor={String(slot.id)} className={cn(
                                                 "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors",
                                                 field.value === slot.id && "border-primary bg-primary/10 text-primary"
@@ -211,7 +213,7 @@ export function CheckoutForm({
                                                 <Separator className="my-2" />
                                                 <p className="text-xs font-bold text-green-600">{slot.remaining} Seats Available</p>
                                             </Label>
-                                        </div>
+                                        </FormItem>
                                     ))}
                                     </RadioGroup>
                                 </FormControl>
