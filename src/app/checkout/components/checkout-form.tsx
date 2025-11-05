@@ -36,7 +36,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, CalendarIcon } from "lucide-react";
 import Image from "next/image";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -204,7 +204,7 @@ export function CheckoutForm({
                                             "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
                                             field.value === slot.id && "border-primary"
                                         )}>
-                                            <p className="font-bold text-lg">{format(new Date(slot.startsAt), "MMM dd, yyyy")}</p>
+                                            <p className="font-bold text-lg">{format(parseISO(slot.startsAt), "MMM dd, yyyy")}</p>
                                             <p className="text-sm text-muted-foreground">{getDurationInNightsAndDays(experience.durationMins)}</p>
                                             <Separator className="my-2" />
                                             <p className="text-xs text-muted-foreground">Starts From</p>
@@ -288,7 +288,7 @@ export function CheckoutForm({
                     </div>
                     <div>
                         <CardTitle className="text-base leading-tight">{experience.title}</CardTitle>
-                        {selectedSlot && <p className="text-sm text-muted-foreground">{format(new Date(selectedSlot.startsAt), "MMM d, yyyy 'at' h:mm a")}</p>}
+                        {selectedSlot && <p className="text-sm text-muted-foreground">{format(parseISO(selectedSlot.startsAt), "MMM d, yyyy 'at' h:mm a")}</p>}
                     </div>
                 </div>
             </CardHeader>
@@ -353,3 +353,5 @@ export function CheckoutForm({
     </Form>
   );
 }
+
+    
