@@ -1,9 +1,11 @@
+
 import { getExperienceBySlug } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { ExperienceClient } from "./components/experience-client";
 import { Container } from "@/components/ui/container";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Star } from "lucide-react";
 
 type Props = {
   params: { slug: string };
