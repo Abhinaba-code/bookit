@@ -99,12 +99,12 @@ export function ExperienceCard({
                             <Ticket className="mr-2 h-4 w-4" /> Book Online
                         </Link>
                     </Button>
-                    <RequestCallbackDialog experience={experience} onSuccess={() => addSentRequest('callback', experience.id)}>
+                    <RequestCallbackDialog experience={experience} onSuccess={(userEmail) => addSentRequest('callback', experience.id, userEmail)}>
                         <Button variant="outline" className="w-full" disabled={callbackSent}>
                             <Phone className="mr-2 h-4 w-4" /> {callbackSent ? 'Callback Sent' : 'Request Callback'}
                         </Button>
                     </RequestCallbackDialog>
-                    <MessageRequestDialog experience={experience} onSuccess={() => addSentRequest('message', experience.id)}>
+                    <MessageRequestDialog experience={experience} onSuccess={(userEmail) => addSentRequest('message', experience.id, userEmail)}>
                         <Button variant="outline" className="w-full" disabled={detailsRequested}>
                             <MessageSquare className="mr-2 h-4 w-4" /> {detailsRequested ? 'Details Requested' : 'Message Request'}
                         </Button>

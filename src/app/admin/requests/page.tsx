@@ -41,7 +41,7 @@ async function enrichRequests<T extends CallbackRequest | MessageRequest>(reques
             if (!req.experienceId) return { ...req, experienceTitle: 'N/A' };
             try {
                 const experience = await getExperienceById(req.experienceId);
-                return { ...req, experienceTitle: experience?.title };
+                return { ...req, experienceTitle: experience?.title || "Unknown Experience" };
             } catch (error) {
                 console.error(`Failed to fetch experience for request ${req.id}:`, error);
                 return { ...req, experienceTitle: 'Experience not found' };
@@ -52,7 +52,7 @@ async function enrichRequests<T extends CallbackRequest | MessageRequest>(reques
 }
 
 export default function AdminRequestsPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, removeSentRequest } = useAuth();
   const router = useRouter();
   const [callbackRequests, setCallbackRequests] = useState<EnrichedCallbackRequest[]>([]);
   const [messageRequests, setMessageRequests] = useState<EnrichedMessageRequest[]>([]);
@@ -91,11 +91,12 @@ export default function AdminRequestsPage() {
     }
   }, [user]);
   
-  const handleDeleteCallback = (id: string) => {
+  const handleDeleteCallback = (req: CallbackRequest) => {
     startDeleteTransition(async () => {
-        const result = await deleteCallbackRequest(id);
+        const result = await deleteCallbackRequest(req.id);
         if (result.success) {
-            setCallbackRequests(prev => prev.filter(r => r.id !== id));
+            setCallbackRequests(prev => prev.filter(r => r.id !== req.id));
+            removeSentRequest('callback', req.experienceId, req.email);
             toast({ title: "Success", description: "Callback request deleted." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -103,11 +104,12 @@ export default function AdminRequestsPage() {
     });
   }
 
-  const handleDeleteMessage = (id: string) => {
+  const handleDeleteMessage = (req: MessageRequest) => {
     startDeleteTransition(async () => {
-        const result = await deleteMessageRequest(id);
+        const result = await deleteMessageRequest(req.id);
         if (result.success) {
-            setMessageRequests(prev => prev.filter(r => r.id !== id));
+            setMessageRequests(prev => prev.filter(r => r.id !== req.id));
+            removeSentRequest('message', req.experienceId, req.email);
             toast({ title: "Success", description: "Message request deleted." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -182,7 +184,7 @@ export default function AdminRequestsPage() {
                                             <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteCallback(req.id)}>Continue</AlertDialogAction>
+                                                <AlertDialogAction onClick={() => handleDeleteCallback(req)}>Continue</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
@@ -229,7 +231,7 @@ export default function AdminRequestsPage() {
                                             <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeleteMessage(req.id)}>Continue</AlertDialogAction>
+                                                <AlertDialogAction onClick={() => handleDeleteMessage(req)}>Continue</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>

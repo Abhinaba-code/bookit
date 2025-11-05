@@ -56,7 +56,7 @@ export function RequestCallbackDialog({
 }: {
   experience: ExperienceSummary;
   children: ReactNode;
-  onSuccess?: () => void;
+  onSuccess?: (userEmail: string) => void;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -88,7 +88,9 @@ export function RequestCallbackDialog({
             });
             form.reset();
             setOpen(false);
-            onSuccess?.();
+            if (user?.email) {
+              onSuccess?.(user.email);
+            }
         } else {
             toast({
                 title: "Error",

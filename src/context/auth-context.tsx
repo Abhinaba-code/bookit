@@ -9,8 +9,8 @@ type User = {
 };
 
 type SentRequests = {
-  callback: number[];
-  message: number[];
+  callback: { experienceId: number; email: string; }[];
+  message: { experienceId: number; email: string; }[];
 }
 
 type AuthContextType = {
@@ -20,15 +20,30 @@ type AuthContextType = {
   logout: () => void;
   signup: (name: string, email: string, pass: string) => void;
   hasSentRequest: (type: 'callback' | 'message', experienceId: number) => boolean;
-  addSentRequest: (type: 'callback' | 'message', experienceId: number) => void;
+  addSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
+  removeSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getInitialSentRequests = (): SentRequests => {
+    if (typeof window === 'undefined') {
+        return { callback: [], message: [] };
+    }
+    const stored = localStorage.getItem('bookit_all_sent_requests');
+    try {
+        if(stored) return JSON.parse(stored);
+    } catch(e) {
+        console.error("Failed to parse sent requests from localStorage", e);
+    }
+    return { callback: [], message: [] };
+}
+
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sentRequests, setSentRequests] = useState<SentRequests>({ callback: [], message: [] });
+  const [sentRequests, setSentRequests] = useState<SentRequests>(getInitialSentRequests);
 
   useEffect(() => {
     // Check local storage for user session
@@ -36,12 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      // Load sent requests for this user
-      const storedRequests = localStorage.getItem(`bookit_sent_requests_${parsedUser.email}`);
-      if (storedRequests) {
-        setSentRequests(JSON.parse(storedRequests));
-      }
     }
+    setSentRequests(getInitialSentRequests()); // Always load from one source of truth
     setLoading(false);
   }, []);
 
@@ -53,13 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { password, ...userToStore } = foundUser;
       setUser(userToStore);
       localStorage.setItem('bookit_user', JSON.stringify(userToStore));
-      // Load requests for newly logged-in user
-      const storedRequests = localStorage.getItem(`bookit_sent_requests_${userToStore.email}`);
-      if (storedRequests) {
-        setSentRequests(JSON.parse(storedRequests));
-      } else {
-        setSentRequests({ callback: [], message: [] });
-      }
     } else {
       throw new Error('Invalid email or password');
     }
@@ -80,34 +84,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { password, ...userToStore } = newUser;
     setUser(userToStore);
     localStorage.setItem('bookit_user', JSON.stringify(userToStore));
-    setSentRequests({ callback: [], message: [] }); // Reset for new user
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('bookit_user');
-    setSentRequests({ callback: [], message: [] }); // Clear requests on logout
   };
   
-  const addSentRequest = useCallback((type: 'callback' | 'message', experienceId: number) => {
-    if (!user) return;
+  const addSentRequest = useCallback((type: 'callback' | 'message', experienceId: number, userEmail: string) => {
     setSentRequests(prev => {
         const newRequests = { ...prev };
-        if (!newRequests[type].includes(experienceId)) {
-            newRequests[type] = [...newRequests[type], experienceId];
-            localStorage.setItem(`bookit_sent_requests_${user.email}`, JSON.stringify(newRequests));
+        const alreadyExists = newRequests[type].some(req => req.experienceId === experienceId && req.email === userEmail);
+        
+        if (!alreadyExists) {
+            newRequests[type] = [...newRequests[type], { experienceId, email: userEmail }];
+            localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
         }
         return newRequests;
     });
-  }, [user]);
+  }, []);
+
+  const removeSentRequest = useCallback((type: 'callback' | 'message', experienceId: number, userEmail: string) => {
+      setSentRequests(prev => {
+          const newRequests = { ...prev };
+          newRequests[type] = newRequests[type].filter(req => !(req.experienceId === experienceId && req.email === userEmail));
+          localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
+          return newRequests;
+      });
+  }, []);
 
   const hasSentRequest = useCallback((type: 'callback' | 'message', experienceId: number): boolean => {
     if (!user) return false;
-    return sentRequests[type].includes(experienceId);
+    return sentRequests[type].some(req => req.experienceId === experienceId && req.email === user.email);
   }, [user, sentRequests]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, hasSentRequest, addSentRequest }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, hasSentRequest, addSentRequest, removeSentRequest }}>
       {children}
     </AuthContext.Provider>
   );
