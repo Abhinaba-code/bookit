@@ -37,6 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, CalendarIcon } from "lucide-react";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
+import { utcToZonedTime } from 'date-fns-tz';
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -66,6 +67,13 @@ const getDurationInNightsAndDays = (durationInMinutes: number): string => {
     }
     return `${nights}N/${days}D`;
 };
+
+const formatInUTC = (date: Date | string, fmt: string) => {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  const zonedDate = utcToZonedTime(dateObj, 'UTC');
+  return format(zonedDate, fmt, { timeZone: 'UTC' });
+};
+
 
 export function CheckoutForm({
   experience,
@@ -290,7 +298,7 @@ export function CheckoutForm({
                     </div>
                     <div>
                         <CardTitle className="text-base leading-tight">{experience.title}</CardTitle>
-                        {selectedSlot && <p className="text-sm text-muted-foreground">{format(parseISO(selectedSlot.startsAt), "MMM d, yyyy 'at' h:mm a")}</p>}
+                        {selectedSlot && <p className="text-sm text-muted-foreground">{formatInUTC(selectedSlot.startsAt, "MMM d, yyyy 'at' h:mm a")}</p>}
                     </div>
                 </div>
             </CardHeader>
