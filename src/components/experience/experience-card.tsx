@@ -104,9 +104,11 @@ export function ExperienceCard({
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" className="w-full" disabled>
-                              <Phone className="mr-2 h-4 w-4" /> Callback Sent
-                            </Button>
+                            <div>
+                              <Button variant="outline" className="w-full" disabled>
+                                <Phone className="mr-2 h-4 w-4" /> Callback Sent
+                              </Button>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
@@ -124,9 +126,11 @@ export function ExperienceCard({
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" className="w-full" disabled>
-                              <MessageSquare className="mr-2 h-4 w-4" /> Details Requested
-                            </Button>
+                            <div>
+                                <Button variant="outline" className="w-full" disabled>
+                                <MessageSquare className="mr-2 h-4 w-4" /> Details Requested
+                                </Button>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent>
                              <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
