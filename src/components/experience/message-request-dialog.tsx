@@ -29,6 +29,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/context/auth-context";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Your Name is required." }),
@@ -47,6 +48,7 @@ export function MessageRequestDialog({
   children: ReactNode;
   onSuccess?: () => void;
 }) {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -54,8 +56,8 @@ export function MessageRequestDialog({
   const form = useForm<MessageRequestFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: user?.name || "",
+      email: user?.email || "",
       phone: "",
     },
   });

@@ -33,6 +33,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { useAuth } from "@/context/auth-context";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Your Name is required." }),
@@ -57,6 +58,7 @@ export function RequestCallbackDialog({
   children: ReactNode;
   onSuccess?: () => void;
 }) {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -64,8 +66,8 @@ export function RequestCallbackDialog({
   const form = useForm<CallbackFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: user?.name || "",
+      email: user?.email || "",
       phone: "",
       city: "",
       adults: 2,

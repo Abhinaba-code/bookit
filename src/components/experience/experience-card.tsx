@@ -3,7 +3,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import type { ExperienceSummary } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +28,13 @@ export function ExperienceCard({
 }: {
   experience: ExperienceSummary;
 }) {
-  const { user } = useAuth();
-  const [callbackSent, setCallbackSent] = useState(false);
-  const [detailsRequested, setDetailsRequested] = useState(false);
+  const { user, hasSentRequest, addSentRequest } = useAuth();
+
+  const callbackSent = hasSentRequest('callback', experience.id);
+  const detailsRequested = hasSentRequest('message', experience.id);
+
   const duration = experience.durationMins ? getDurationInNightsAndDays(experience.durationMins) : null;
+  
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg w-full">
         <div className="flex flex-col sm:flex-row">
@@ -97,12 +99,12 @@ export function ExperienceCard({
                             <Ticket className="mr-2 h-4 w-4" /> Book Online
                         </Link>
                     </Button>
-                    <RequestCallbackDialog experience={experience} onSuccess={() => setCallbackSent(true)}>
+                    <RequestCallbackDialog experience={experience} onSuccess={() => addSentRequest('callback', experience.id)}>
                         <Button variant="outline" className="w-full" disabled={callbackSent}>
                             <Phone className="mr-2 h-4 w-4" /> {callbackSent ? 'Callback Sent' : 'Request Callback'}
                         </Button>
                     </RequestCallbackDialog>
-                    <MessageRequestDialog experience={experience} onSuccess={() => setDetailsRequested(true)}>
+                    <MessageRequestDialog experience={experience} onSuccess={() => addSentRequest('message', experience.id)}>
                         <Button variant="outline" className="w-full" disabled={detailsRequested}>
                             <MessageSquare className="mr-2 h-4 w-4" /> {detailsRequested ? 'Details Requested' : 'Message Request'}
                         </Button>
