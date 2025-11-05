@@ -132,10 +132,8 @@ export default function MyBookingsPage() {
     // Refund the amount
     addBalance(bookingToCancel.total);
     
-    // Instead of removing, we update the status to CANCELLED
-    const updatedBookings = allBookings.map(b => 
-        b.id === bookingId ? { ...b, status: 'CANCELLED' } : b
-    );
+    // Filter out the cancelled booking
+    const updatedBookings = allBookings.filter(b => b.id !== bookingId);
     saveStoredBookings(updatedBookings);
 
     // Re-fetch to update the UI state correctly
