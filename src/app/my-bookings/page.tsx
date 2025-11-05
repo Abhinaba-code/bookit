@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { getStoredBookings, saveStoredBookings } from "@/lib/data";
+import { getStoredBookings, saveStoredBookings, getStoredSlots, saveStoredSlots } from "@/lib/data";
 import { getExperienceById, getSlotById } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -132,6 +132,15 @@ export default function MyBookingsPage() {
     // Refund the amount
     addBalance(bookingToCancel.total);
     
+    // Update slot availability
+    const allSlots = getStoredSlots();
+    const slotIndex = allSlots.findIndex(s => s.id === bookingToCancel.slotId);
+    if(slotIndex > -1) {
+        allSlots[slotIndex].remaining += bookingToCancel.numGuests;
+        allSlots[slotIndex].isSoldOut = false;
+        saveStoredSlots(allSlots);
+    }
+
     // Filter out the cancelled booking
     const updatedBookings = allBookings.filter(b => b.id !== bookingId);
     saveStoredBookings(updatedBookings);
@@ -195,5 +204,7 @@ export default function MyBookingsPage() {
     </Container>
   );
 }
+
+    
 
     
