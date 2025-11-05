@@ -25,6 +25,7 @@ type AuthContextType = {
   updateUser: (currentEmail: string, updates: Partial<UserWithPassword>) => void;
   hasSentRequest: (type: 'callback' | 'message', experienceId: number) => boolean;
   addSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
+  removeSentRequest: (type: 'callback' | 'message', experienceId: number, userEmail: string) => void;
   addBalance: (amount: number) => void;
   deductBalance: (amount: number) => void;
 };
@@ -191,6 +192,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const removeSentRequest = useCallback((type: 'callback' | 'message', experienceId: number, userEmail: string) => {
+    setSentRequests(prev => {
+        const newRequests = { ...prev };
+        newRequests[type] = newRequests[type].filter(req => !(req.experienceId === experienceId && req.email === userEmail));
+        sessionStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
+        return newRequests;
+    });
+  }, []);
+
   const hasSentRequest = useCallback((type: 'callback' | 'message', experienceId: number): boolean => {
     if (!user) return false;
     // This check should be based on the local state which is loaded from sessionStorage.
@@ -199,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser, hasSentRequest, addSentRequest, addBalance, deductBalance }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser, hasSentRequest, addSentRequest, removeSentRequest, addBalance, deductBalance }}>
       {children}
     </AuthContext.Provider>
   );

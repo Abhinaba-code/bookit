@@ -30,7 +30,7 @@ type EnrichedCallbackRequest = CallbackRequest & { experienceTitle?: string };
 type EnrichedMessageRequest = MessageRequest & { experienceTitle?: string };
 
 export default function AdminRequestsPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, removeSentRequest } = useAuth();
   const router = useRouter();
   const [callbackRequests, setCallbackRequests] = useState<EnrichedCallbackRequest[]>([]);
   const [messageRequests, setMessageRequests] = useState<EnrichedMessageRequest[]>([]);
@@ -71,6 +71,9 @@ export default function AdminRequestsPage() {
         
         if (requests.length < initialLength) {
             saveStoredCallbackRequests(requests);
+            if(user?.email === req.email) {
+                removeSentRequest('callback', req.experienceId, req.email);
+            }
             fetchAndSetData(); // Refetch after deleting
             toast({ title: "Success", description: "Callback request deleted." });
         } else {
@@ -87,6 +90,9 @@ export default function AdminRequestsPage() {
 
         if (requests.length < initialLength) {
             saveStoredMessageRequests(requests);
+             if(user?.email === req.email) {
+                removeSentRequest('message', req.experienceId, req.email);
+            }
             fetchAndSetData(); // Refetch after deleting
             toast({ title: "Success", description: "Message request deleted." });
         } else {
@@ -229,5 +235,3 @@ export default function AdminRequestsPage() {
     </Container>
   );
 }
-
-    
