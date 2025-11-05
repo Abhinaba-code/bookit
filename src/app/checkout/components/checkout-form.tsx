@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,6 +99,10 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
 
+  const bookingId = searchParams.bookingId as string | undefined;
+  const experienceId = searchParams.experienceId ? Number(searchParams.experienceId) : undefined;
+  const slotId = searchParams.slotId ? Number(searchParams.slotId) : undefined;
+
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -119,12 +123,25 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
   });
 
   useEffect(() => {
+    // Wait until we have the necessary URL parameters before loading data.
+    if (!bookingId && !experienceId) {
+        // If we are in the browser and still don't have the params, it's an error.
+        if (typeof window !== 'undefined') {
+            const timer = setTimeout(() => {
+                // Check again after a short delay in case of slow hydration
+                 if (!searchParams.bookingId && !searchParams.experienceId) {
+                    toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
+                    router.push('/dashboard');
+                 }
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+        return;
+    }
+
+
     async function loadData() {
         setIsLoading(true);
-        const bookingId = searchParams.bookingId as string | undefined;
-        const experienceId = searchParams.experienceId ? Number(searchParams.experienceId) : undefined;
-        const slotId = searchParams.slotId ? Number(searchParams.slotId) : undefined;
-
         let bookingToEdit: Booking | undefined;
         let loadedExperience: ExperienceDetail | null = null;
         let loadedSlot: Slot | undefined;
@@ -145,10 +162,6 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
                 if (slotId) {
                     loadedSlot = await getSlotById(slotId) || undefined;
                 }
-            } else {
-                toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
-                router.push('/dashboard');
-                return;
             }
 
             if (!loadedExperience) {
@@ -192,7 +205,7 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
         }
     }
     loadData();
-  }, [searchParams, form, router, toast]);
+  }, [bookingId, experienceId, slotId, form, router, toast, searchParams]);
 
 
   const adults = form.watch("adults");
