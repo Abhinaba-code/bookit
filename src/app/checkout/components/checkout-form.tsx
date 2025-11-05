@@ -37,7 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, CalendarIcon } from "lucide-react";
 import Image from "next/image";
 import { format, parseISO } from "date-fns";
-import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -70,7 +70,9 @@ const getDurationInNightsAndDays = (durationInMinutes: number): string => {
 
 const formatInUTC = (date: Date | string, fmt: string) => {
   const dateObj = typeof date === 'string' ? parseISO(date) : date;
-  const zonedDate = utcToZonedTime(dateObj, 'UTC');
+  // The date is already in UTC from the server, we just need to format it in UTC.
+  // toZonedTime helps ensure that the date object is treated as UTC before formatting.
+  const zonedDate = toZonedTime(dateObj, 'UTC');
   return format(zonedDate, fmt, { timeZone: 'UTC' });
 };
 
@@ -363,5 +365,3 @@ export function CheckoutForm({
     </Form>
   );
 }
-
-    
