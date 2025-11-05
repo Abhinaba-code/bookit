@@ -10,6 +10,7 @@ import type { ExperienceSummary } from "@/types";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createCallbackRequest } from "@/lib/actions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,18 +77,23 @@ export function RequestCallbackDialog({
 
   const onSubmit = (values: CallbackFormValues) => {
     startTransition(async () => {
-        // Here you would typically send the data to your backend
-        console.log({ ...values, experienceId: experience.id });
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const result = await createCallbackRequest({ ...values, experienceId: experience.id });
 
-        toast({
-            title: "Enquiry Sent!",
-            description: "Our team will get back to you shortly.",
-        });
-        form.reset();
-        setOpen(false);
-        onSuccess?.();
+        if (result.success) {
+            toast({
+                title: "Enquiry Sent!",
+                description: "Our team will get back to you shortly.",
+            });
+            form.reset();
+            setOpen(false);
+            onSuccess?.();
+        } else {
+            toast({
+                title: "Error",
+                description: result.error || "Could not send enquiry.",
+                variant: "destructive"
+            });
+        }
     });
   };
 

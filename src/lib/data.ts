@@ -1,4 +1,5 @@
-import type { ExperienceDetail, Slot, Booking } from "@/types";
+
+import type { ExperienceDetail, Slot, Booking, CallbackRequest, MessageRequest } from "@/types";
 import { PlaceHolderImages } from "./placeholder-images";
 
 const addDays = (days: number) => {
@@ -452,5 +453,6 @@ export const experiences: ExperienceDetail[] = experiencesData.map((exp, index) 
 export const slots: Slot[] = generatedSlots;
 
 export let bookings: Booking[] = [];
-
+export let callbackRequests: CallbackRequest[] = [];
+export let messageRequests: MessageRequest[] = [];
     

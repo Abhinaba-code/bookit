@@ -1,3 +1,4 @@
+
 export type ExperienceSummary = {
   id: number;
   title: string;
@@ -41,4 +42,30 @@ export type Booking = {
   total: number;
   status: "CONFIRMED" | "FAILED" | "CANCELLED";
   createdAt: string;
+};
+
+export type CallbackRequest = {
+  id: string;
+  experienceId: number;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  adults: number;
+  children: number;
+  infants: number;
+  dateOfTravel: string;
+  query: string;
+  createdAt: string;
+  status: "PENDING" | "CONTACTED" | "CLOSED";
+};
+
+export type MessageRequest = {
+  id: string;
+  experienceId: number;
+  name: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  status: "PENDING" | "SENT" | "CLOSED";
 };

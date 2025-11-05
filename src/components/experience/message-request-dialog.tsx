@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import type { ExperienceSummary } from "@/types";
 import { Loader2 } from "lucide-react";
+import { createMessageRequest } from "@/lib/actions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,18 +62,23 @@ export function MessageRequestDialog({
 
   const onSubmit = (values: MessageRequestFormValues) => {
     startTransition(async () => {
-        // Here you would typically send the data to your backend
-        console.log({ ...values, experienceId: experience.id });
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const result = await createMessageRequest({ ...values, experienceId: experience.id });
 
-        toast({
-            title: "Request Sent!",
-            description: "You will receive the details via message shortly.",
-        });
-        form.reset();
-        setOpen(false);
-        onSuccess?.();
+        if (result.success) {
+            toast({
+                title: "Request Sent!",
+                description: "You will receive the details via message shortly.",
+            });
+            form.reset();
+            setOpen(false);
+            onSuccess?.();
+        } else {
+            toast({
+                title: "Error",
+                description: result.error || "Could not send request.",
+                variant: "destructive"
+            });
+        }
     });
   };
 

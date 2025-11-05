@@ -2,9 +2,10 @@
 "use server";
 
 import { z } from "zod";
-import { experiences, slots, bookings } from "./data";
+import { experiences, slots, bookings, callbackRequests, messageRequests } from "./data";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
+import type { CallbackRequest, MessageRequest } from "@/types";
 
 const bookingSchema = z.object({
   experienceId: z.coerce.number().int().positive(),
@@ -90,4 +91,88 @@ export async function getBookingById(bookingId: string) {
 export async function getAllBookings() {
     // In a real app, you'd fetch this for the logged-in user from a database
     return { success: true, bookings: [...bookings] };
+}
+
+// Actions for Callback and Message Requests
+
+const callbackRequestSchema = z.object({
+    experienceId: z.coerce.number().int().positive(),
+    name: z.string().min(1, "Your Name is required."),
+    email: z.string().email("Please enter a valid email address."),
+    phone: z.string().min(1, "Phone Number is required."),
+    city: z.string().min(1, "Current City is required."),
+    adults: z.coerce.number().int().min(1),
+    children: z.coerce.number().int().min(0),
+    infants: z.coerce.number().int().min(0),
+    dateOfTravel: z.date(),
+    query: z.string().min(10, "Please enter a query of at least 10 characters."),
+});
+
+export async function createCallbackRequest(data: unknown) {
+    const validation = callbackRequestSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Invalid input." };
+    }
+    const newRequest: CallbackRequest = {
+        id: uuidv4(),
+        ...validation.data,
+        dateOfTravel: validation.data.dateOfTravel.toISOString(),
+        createdAt: new Date().toISOString(),
+        status: "PENDING",
+    };
+    callbackRequests.push(newRequest);
+    revalidatePath('/admin/requests');
+    return { success: true, request: newRequest };
+}
+
+const messageRequestSchema = z.object({
+    experienceId: z.coerce.number().int().positive(),
+    name: z.string().min(1, "Your Name is required."),
+    email: z.string().email("Please enter a valid email address."),
+    phone: z.string().min(1, "Phone Number is required."),
+});
+
+export async function createMessageRequest(data: unknown) {
+    const validation = messageRequestSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Invalid input." };
+    }
+    const newRequest: MessageRequest = {
+        id: uuidv4(),
+        ...validation.data,
+        createdAt: new Date().toISOString(),
+        status: "PENDING",
+    };
+    messageRequests.push(newRequest);
+    revalidatePath('/admin/requests');
+    return { success: true, request: newRequest };
+}
+
+
+export async function getAllCallbackRequests() {
+    return { success: true, requests: [...callbackRequests].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
+}
+
+export async function getAllMessageRequests() {
+    return { success: true, requests: [...messageRequests].sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
+}
+
+export async function deleteCallbackRequest(id: string) {
+    const index = callbackRequests.findIndex(r => r.id === id);
+    if (index > -1) {
+        callbackRequests.splice(index, 1);
+        revalidatePath('/admin/requests');
+        return { success: true };
+    }
+    return { success: false, error: "Request not found." };
+}
+
+export async function deleteMessageRequest(id: string) {
+    const index = messageRequests.findIndex(r => r.id === id);
+    if (index > -1) {
+        messageRequests.splice(index, 1);
+        revalidatePath('/admin/requests');
+        return { success: true };
+    }
+    return { success: false, error: "Request not found." };
 }
