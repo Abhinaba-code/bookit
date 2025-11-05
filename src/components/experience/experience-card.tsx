@@ -13,6 +13,7 @@ import { Star, MapPin, Calendar, Check, Eye, Ticket, Phone, MessageSquare } from
 import { RequestCallbackDialog } from "./request-callback-dialog";
 import { MessageRequestDialog } from "./message-request-dialog";
 import { useAuth } from "@/context/auth-context";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getDurationInNightsAndDays = (durationInMinutes: number): string => {
     const days = Math.ceil(durationInMinutes / (60 * 24));
@@ -99,16 +100,46 @@ export function ExperienceCard({
                             <Ticket className="mr-2 h-4 w-4" /> Book Online
                         </Link>
                     </Button>
-                    <RequestCallbackDialog experience={experience} onSuccess={(userEmail) => addSentRequest('callback', experience.id, userEmail)}>
-                        <Button variant="outline" className="w-full" disabled={callbackSent}>
-                            <Phone className="mr-2 h-4 w-4" /> {callbackSent ? 'Callback Sent' : 'Request Callback'}
-                        </Button>
-                    </RequestCallbackDialog>
-                    <MessageRequestDialog experience={experience} onSuccess={(userEmail) => addSentRequest('message', experience.id, userEmail)}>
-                        <Button variant="outline" className="w-full" disabled={detailsRequested}>
-                            <MessageSquare className="mr-2 h-4 w-4" /> {detailsRequested ? 'Details Requested' : 'Message Request'}
-                        </Button>
-                    </MessageRequestDialog>
+                    {callbackSent ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" className="w-full" disabled>
+                              <Phone className="mr-2 h-4 w-4" /> Callback Sent
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <RequestCallbackDialog experience={experience} onSuccess={(userEmail) => addSentRequest('callback', experience.id, userEmail)}>
+                          <Button variant="outline" className="w-full">
+                              <Phone className="mr-2 h-4 w-4" /> Request Callback
+                          </Button>
+                      </RequestCallbackDialog>
+                    )}
+                    {detailsRequested ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" className="w-full" disabled>
+                              <MessageSquare className="mr-2 h-4 w-4" /> Details Requested
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                             <p>You have already sent a request. Go to <Link href="/admin/requests" className="underline">Admin</Link> to edit.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <MessageRequestDialog experience={experience} onSuccess={(userEmail) => addSentRequest('message', experience.id, userEmail)}>
+                          <Button variant="outline" className="w-full">
+                              <MessageSquare className="mr-2 h-4 w-4" /> Message Request
+                          </Button>
+                      </MessageRequestDialog>
+                    )}
                   </>
                 )}
             </div>
