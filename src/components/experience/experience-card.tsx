@@ -27,6 +27,7 @@ export function ExperienceCard({
               alt={experience.title}
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               data-ai-hint={experience.imageHint}
             />
             {experience.rating && (
@@ -41,7 +42,7 @@ export function ExperienceCard({
           </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">
-          <CardTitle className="text-lg font-headline mb-2 leading-tight">
+          <CardTitle className="text-base font-headline mb-2 leading-tight">
             {experience.title}
           </CardTitle>
           <div className="text-sm text-muted-foreground flex items-center gap-2">
@@ -51,8 +52,8 @@ export function ExperienceCard({
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
             <div className="flex items-baseline gap-1">
-                <span className="font-bold text-xl text-primary">₹{experience.price}</span>
-                <span className="text-sm text-muted-foreground">/ person</span>
+                <span className="font-bold text-lg text-primary">₹{experience.price}</span>
+                <span className="text-xs text-muted-foreground">/ person</span>
             </div>
             {experience.nextAvailable ? (
                 <Badge variant="secondary" className="text-xs">

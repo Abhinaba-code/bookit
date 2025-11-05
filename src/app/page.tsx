@@ -1,25 +1,19 @@
 import { Suspense } from "react";
-import { ExperienceCard } from "@/components/experience/experience-card";
-import { SkeletonCard } from "@/components/experience/skeleton-card";
 import { getExperiences } from "@/lib/api";
 import { Container } from "@/components/ui/container";
+import { Sidebar } from "@/components/layout/sidebar";
+import { ExperienceList } from "@/components/experience/experience-list";
+import { SkeletonCard } from "@/components/experience/skeleton-card";
 
 async function Experiences() {
   const experiences = await getExperiences();
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {experiences.map((experience) => (
-        <ExperienceCard key={experience.id} experience={experience} />
-      ))}
-    </div>
-  );
+  return <ExperienceList experiences={experiences} />;
 }
 
 function ExperiencesSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array.from({ length: 8 }).map((_, i) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: 9 }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}
     </div>
@@ -28,19 +22,20 @@ function ExperiencesSkeleton() {
 
 export default function Home() {
   return (
-    <Container className="py-12">
-      <div className="space-y-4 mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-headline">
-          Explore Experiences
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Book unique activities and create unforgettable memories.
-        </p>
+    <Container className="py-8">
+      <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+        <Sidebar />
+        <main>
+          <div className="mb-4">
+            <h1 className="text-2xl font-bold font-headline tracking-tight">
+              Adventure Tours (79 Tour Option)
+            </h1>
+          </div>
+          <Suspense fallback={<ExperiencesSkeleton />}>
+            <Experiences />
+          </Suspense>
+        </main>
       </div>
-
-      <Suspense fallback={<ExperiencesSkeleton />}>
-        <Experiences />
-      </Suspense>
     </Container>
   );
 }
