@@ -146,7 +146,9 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
                     loadedSlot = await getSlotById(slotId) || undefined;
                 }
             } else {
-                throw new Error("No valid parameters provided.");
+                toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
+                router.push('/dashboard');
+                return;
             }
 
             if (!loadedExperience) {
@@ -508,3 +510,5 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
     </Form>
   );
 }
+
+    
