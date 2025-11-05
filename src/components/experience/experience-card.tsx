@@ -70,7 +70,7 @@ export function ExperienceCard({
                     </p>
                 </div>
             </div>
-            <div className="p-4 border-t sm:border-t-0 sm:border-l flex flex-col items-end justify-center shrink-0 min-w-[180px]">
+            <div className="p-4 border-t sm:border-t-0 sm:border-l flex flex-col items-stretch justify-center shrink-0 min-w-[180px] gap-2">
                 <div className="text-right">
                      <p className="text-xs text-muted-foreground">All inclusive price starts</p>
                     <p className="text-2xl font-bold text-primary">₹{experience.price}</p>
@@ -81,6 +81,11 @@ export function ExperienceCard({
                         View Details
                     </Link>
                 </Button>
+                <Button asChild variant="outline" className="w-full">
+                    <Link href={`/experience/${experience.slug}`}>Book Online</Link>
+                </Button>
+                <Button variant="outline" className="w-full">Request Callback</Button>
+                <Button variant="outline" className="w-full">Message Request</Button>
             </div>
         </div>
     </Card>
