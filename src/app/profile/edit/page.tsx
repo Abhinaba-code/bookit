@@ -17,11 +17,34 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional().or(z.literal('')),
+  oldPassword: z.string().optional(),
+  newPassword: z.string().optional(),
+  confirmNewPassword: z.string().optional(),
+}).refine((data) => {
+    if (data.newPassword && !data.oldPassword) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Old password is required to set a new password.",
+    path: ["oldPassword"],
+}).refine((data) => {
+    if (data.newPassword && data.newPassword.length < 6) {
+        return false;
+    }
+    return true;
+}, {
+    message: "New password must be at least 6 characters.",
+    path: ["newPassword"],
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New passwords don't match.",
+    path: ["confirmNewPassword"],
 });
 
 type ProfileFormValues = z.infer<typeof formSchema>;
@@ -37,7 +60,9 @@ export default function EditProfilePage() {
     defaultValues: {
       name: "",
       email: "",
-      password: "",
+      oldPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
     },
   });
 
@@ -49,7 +74,9 @@ export default function EditProfilePage() {
       form.reset({
         name: user.name,
         email: user.email,
-        password: "",
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
       });
     }
   }, [user, loading, router, form]);
@@ -57,12 +84,19 @@ export default function EditProfilePage() {
   const onSubmit = (values: ProfileFormValues) => {
     if (!user) return;
     
+    // Require old password for any change
+    if (!values.oldPassword) {
+        form.setError("oldPassword", { type: "manual", message: "Your current password is required to save changes." });
+        return;
+    }
+
     startTransition(() => {
         try {
             updateUser(user.email, {
                 name: values.name,
                 email: values.email,
-                ...(values.password && { password: values.password })
+                oldPassword: values.oldPassword,
+                ...(values.newPassword && { password: values.newPassword })
             });
             toast({
                 title: "Profile Updated",
@@ -143,20 +177,49 @@ export default function EditProfilePage() {
                             </FormItem>
                         )}
                     />
+                    <Separator />
+                    <p className="text-sm font-medium">Change Password</p>
                      <FormField
                         control={form.control}
-                        name="password"
+                        name="newPassword"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>New Password</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="Leave blank to keep current password" {...field} />
+                                    <Input type="password" placeholder="Enter new password" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <div className="flex gap-2">
+                     <FormField
+                        control={form.control}
+                        name="confirmNewPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Confirm New Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="Confirm your new password" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <Separator />
+                      <FormField
+                        control={form.control}
+                        name="oldPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Current Password *</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="Enter your current password to save changes" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <div className="flex gap-2 pt-4">
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Save Changes

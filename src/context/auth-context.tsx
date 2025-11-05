@@ -8,7 +8,7 @@ type User = {
   email: string;
 };
 
-type UserWithPassword = User & { password?: string };
+type UserWithPassword = User & { password?: string; oldPassword?: string };
 
 type SentRequests = {
   callback: { experienceId: number; email: string; }[];
@@ -91,6 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = (currentEmail: string, updates: Partial<UserWithPassword>) => {
     const storedUsers: UserWithPassword[] = JSON.parse(localStorage.getItem('bookit_users') || '[]');
+    const userIndex = storedUsers.findIndex(u => u.email === currentEmail);
+
+    if (userIndex === -1) {
+        throw new Error('Could not find user to update.');
+    }
+
+    const userToUpdate = storedUsers[userIndex];
+
+    // Verify old password
+    if (userToUpdate.password !== updates.oldPassword) {
+        throw new Error('Incorrect current password.');
+    }
     
     // Check if new email is already taken by another user
     if (updates.email && updates.email !== currentEmail) {
@@ -100,35 +112,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    const userIndex = storedUsers.findIndex(u => u.email === currentEmail);
+    // Update user in the full list
+    const updatedUser = { ...userToUpdate, ...updates };
+    // oldPassword is not part of the user model, so don't save it
+    delete updatedUser.oldPassword;
+    storedUsers[userIndex] = updatedUser;
+    localStorage.setItem('bookit_users', JSON.stringify(storedUsers));
+    
+    // Update the current session user
+    const { password, ...userToStore } = updatedUser;
+    setUser(userToStore);
+    localStorage.setItem('bookit_user', JSON.stringify(userToStore));
 
-    if (userIndex > -1) {
-        // Update user in the full list
-        const updatedUser = { ...storedUsers[userIndex], ...updates };
-        storedUsers[userIndex] = updatedUser;
-        localStorage.setItem('bookit_users', JSON.stringify(storedUsers));
-        
-        // Update the current session user
-        const { password, ...userToStore } = updatedUser;
-        setUser(userToStore);
-        localStorage.setItem('bookit_user', JSON.stringify(userToStore));
-
-        // If email was changed, we need to update sent requests as well
-        if (updates.email && updates.email !== currentEmail) {
-          setSentRequests(prev => {
-            const newRequests: SentRequests = JSON.parse(JSON.stringify(prev)); // deep copy
-            newRequests.callback.forEach(req => {
-              if (req.email === currentEmail) req.email = updates.email!;
-            });
-            newRequests.message.forEach(req => {
-              if (req.email === currentEmail) req.email = updates.email!;
-            });
-            localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
-            return newRequests;
-          });
-        }
-    } else {
-        throw new Error('Could not find user to update.');
+    // If email was changed, we need to update sent requests as well
+    if (updates.email && updates.email !== currentEmail) {
+      setSentRequests(prev => {
+        const newRequests: SentRequests = JSON.parse(JSON.stringify(prev)); // deep copy
+        newRequests.callback.forEach(req => {
+          if (req.email === currentEmail) req.email = updates.email!;
+        });
+        newRequests.message.forEach(req => {
+          if (req.email === currentEmail) req.email = updates.email!;
+        });
+        localStorage.setItem('bookit_all_sent_requests', JSON.stringify(newRequests));
+        return newRequests;
+      });
     }
   };
 
