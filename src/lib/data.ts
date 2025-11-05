@@ -415,18 +415,19 @@ const experiencesData: Omit<ExperienceDetail, 'slots' | 'imageUrl' | 'imageHint'
 
 const generatedSlots: Slot[] = [];
 experiencesData.forEach(exp => {
-  for (let i = 1; i <= 5; i++) {
-    const capacity = 12;
-    const remaining = Math.floor(Math.random() * (capacity + 1));
-    generatedSlots.push({
-      id: generatedSlots.length + 1,
-      experienceId: exp.id,
-      startsAt: addHrs(addDays(i), Math.random() > 0.5 ? 9 : 14).toISOString(),
-      capacity: capacity,
-      remaining: remaining,
-      isSoldOut: remaining === 0,
-    });
-  }
+    const remainingSeatsOptions = [0, 10, 4, 15, 0];
+    for (let i = 1; i <= 5; i++) {
+        const capacity = 15;
+        const remaining = remainingSeatsOptions[i-1];
+        generatedSlots.push({
+        id: generatedSlots.length + 1,
+        experienceId: exp.id,
+        startsAt: addHrs(addDays(i * 5), Math.random() > 0.5 ? 9 : 14).toISOString(),
+        capacity: capacity,
+        remaining: remaining,
+        isSoldOut: remaining === 0,
+        });
+    }
 });
 
 
