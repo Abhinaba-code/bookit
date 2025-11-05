@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { ExperienceSummary } from "@/types";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ExperienceList } from "@/components/experience/experience-list";
 import { Search } from "lucide-react";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -16,14 +15,10 @@ export function HomeContainer({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
-  const [durationRange, setDurationRange] = useState<[number, number]>([1, 30]);
+  const [durationRange, setDurationRange] = useState<[number, number]>([0, 30]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
-    const query = formData.get("search") as string;
-    setSearchTerm(query);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
   
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
@@ -43,6 +38,7 @@ export function HomeContainer({
   const filteredExperiences = experiences.filter((experience) => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
     const searchMatch =
+      !searchTerm ||
       experience.title.toLowerCase().includes(lowercasedSearchTerm) ||
       experience.location.toLowerCase().includes(lowercasedSearchTerm);
     
@@ -52,7 +48,6 @@ export function HomeContainer({
 
     const priceMatch = experience.price >= priceRange[0] && experience.price <= priceRange[1];
 
-    // Duration in the data is in minutes. We convert days from the slider to minutes.
     const durationInDays = experience.durationMins / (60 * 24);
     const durationMatch = durationInDays >= durationRange[0] && durationInDays <= durationRange[1];
 
@@ -76,18 +71,16 @@ export function HomeContainer({
             </h1>
             <p className="text-muted-foreground">Embark on a heavenly journey with BookIt Tours. Travel through the most well-known places. Enjoy adventure activities and create unforgettable memories.</p>
           </div>
-            <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+            <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                 type="text"
                 name="search"
                 placeholder="Search by title or location..."
-                className="flex-1"
+                className="w-full pl-10"
+                onChange={handleSearchChange}
                 />
-                <Button type="submit">
-                <Search className="mr-2 h-4 w-4" />
-                Search
-                </Button>
-            </form>
+            </div>
             {filteredExperiences.length > 0 ? (
                 <ExperienceList experiences={filteredExperiences} />
             ) : (
