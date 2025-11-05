@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -210,6 +210,13 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
         setTotal(newSubtotal - discount);
     }
   }, [numGuests, checkoutData?.experience, discount]);
+  
+  useEffect(() => {
+    if (selectedSlot && numGuests > selectedSlot.remaining) {
+      // If the selected slot is no longer valid for the new number of guests, deselect it.
+      form.setValue('slotId', -1, { shouldValidate: true });
+    }
+  }, [numGuests, selectedSlot, form]);
 
   const handleApplyPromo = async () => {
     const code = form.getValues("promoCode");
@@ -349,14 +356,20 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
                             <FormItem>
                                 <FormControl>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {experience.slots.filter(s => !s.isSoldOut).map((slot) => (
+                                        {experience.slots.map((slot) => {
+                                            const hasEnoughSeats = numGuests <= slot.remaining;
+                                            const disabled = slot.isSoldOut || !hasEnoughSeats;
+
+                                            return (
                                             <button
                                                 type="button"
                                                 key={slot.id}
                                                 onClick={() => handleSlotSelect(slot.id)}
+                                                disabled={disabled}
                                                 className={cn(
                                                     "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors text-left",
-                                                    selectedSlotId === slot.id && "border-primary bg-primary/10 text-primary"
+                                                    selectedSlotId === slot.id && "border-primary bg-primary/10 text-primary",
+                                                    disabled && "opacity-50 cursor-not-allowed bg-muted/50 hover:bg-muted/50"
                                                 )}
                                             >
                                                 <p className="font-bold text-lg">{formatInUTC(slot.startsAt, "MMM dd, yyyy")}</p>
@@ -365,9 +378,16 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
                                                 <p className="text-xs text-muted-foreground">Starts From</p>
                                                 <p className="font-semibold">₹{experience.price.toLocaleString()}</p>
                                                 <Separator className="my-2" />
-                                                <p className="text-xs font-bold text-green-600">{slot.remaining} Seats Available</p>
+                                                {disabled && !slot.isSoldOut ? (
+                                                    <p className="text-xs font-bold text-destructive">Not enough seats</p>
+                                                ) : (
+                                                    <p className={cn("text-xs font-bold", slot.isSoldOut ? "text-destructive" : "text-green-600")}>
+                                                        {slot.isSoldOut ? "Sold Out" : `${slot.remaining} Seats Available`}
+                                                    </p>
+                                                )}
                                             </button>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 </FormControl>
                                 <FormMessage />
@@ -519,3 +539,5 @@ export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: 
     </Form>
   );
 }
+
+    
