@@ -1,6 +1,9 @@
 
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import type { ExperienceSummary } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +29,8 @@ export function ExperienceCard({
 }: {
   experience: ExperienceSummary;
 }) {
+  const [callbackSent, setCallbackSent] = useState(false);
+  const [detailsRequested, setDetailsRequested] = useState(false);
   const duration = experience.durationMins ? getDurationInNightsAndDays(experience.durationMins) : null;
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg w-full">
@@ -85,18 +90,18 @@ export function ExperienceCard({
                     </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                    <Link href={`/experience/${experience.slug}`}>
+                     <Link href={`/experience/${experience.slug}`}>
                         <Ticket className="mr-2 h-4 w-4" /> Book Online
                     </Link>
                 </Button>
-                <RequestCallbackDialog experience={experience}>
-                    <Button variant="outline" className="w-full">
-                        <Phone className="mr-2 h-4 w-4" /> Request Callback
+                <RequestCallbackDialog experience={experience} onSuccess={() => setCallbackSent(true)}>
+                    <Button variant="outline" className="w-full" disabled={callbackSent}>
+                        <Phone className="mr-2 h-4 w-4" /> {callbackSent ? 'Callback Sent' : 'Request Callback'}
                     </Button>
                 </RequestCallbackDialog>
-                <MessageRequestDialog experience={experience}>
-                    <Button variant="outline" className="w-full">
-                        <MessageSquare className="mr-2 h-4 w-4" /> Message Request
+                <MessageRequestDialog experience={experience} onSuccess={() => setDetailsRequested(true)}>
+                    <Button variant="outline" className="w-full" disabled={detailsRequested}>
+                        <MessageSquare className="mr-2 h-4 w-4" /> {detailsRequested ? 'Details Requested' : 'Message Request'}
                     </Button>
                 </MessageRequestDialog>
             </div>

@@ -40,9 +40,11 @@ type MessageRequestFormValues = z.infer<typeof formSchema>;
 export function MessageRequestDialog({
   experience,
   children,
+  onSuccess
 }: {
   experience: ExperienceSummary;
   children: ReactNode;
+  onSuccess?: () => void;
 }) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -70,6 +72,7 @@ export function MessageRequestDialog({
         });
         form.reset();
         setOpen(false);
+        onSuccess?.();
     });
   };
 
@@ -79,6 +82,7 @@ export function MessageRequestDialog({
             {children}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[480px]">
+         <div className="relative max-h-[90vh] overflow-y-auto pr-4">
             <DialogHeader>
                 <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-4">
                     <Image
@@ -95,7 +99,7 @@ export function MessageRequestDialog({
                 </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
                     <FormField control={form.control} name="name" render={({ field }) => (
                         <FormItem><FormLabel>Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
@@ -110,6 +114,7 @@ export function MessageRequestDialog({
                     </Button>
                 </form>
             </Form>
+        </div>
         </DialogContent>
     </Dialog>
   );

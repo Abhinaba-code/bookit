@@ -50,9 +50,11 @@ type CallbackFormValues = z.infer<typeof formSchema>;
 export function RequestCallbackDialog({
   experience,
   children,
+  onSuccess,
 }: {
   experience: ExperienceSummary;
   children: ReactNode;
+  onSuccess?: () => void;
 }) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -85,6 +87,7 @@ export function RequestCallbackDialog({
         });
         form.reset();
         setOpen(false);
+        onSuccess?.();
     });
   };
 
@@ -94,89 +97,91 @@ export function RequestCallbackDialog({
             {children}
         </DialogTrigger>
         <DialogContent className="sm:max-w-[480px]">
-            <DialogHeader>
-                <DialogTitle>Enquire for: {experience.title}</DialogTitle>
-                <DialogDescription>
-                    Do you have any questions before you book? The expert team will get back to you shortly.
-                </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField control={form.control} name="name" render={({ field }) => (
-                            <FormItem><FormLabel>Your Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="email" render={({ field }) => (
-                            <FormItem><FormLabel>Email address *</FormLabel><FormControl><Input placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Phone Number *</FormLabel><FormControl><Input placeholder="+91 12345 67890" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="city" render={({ field }) => (
-                            <FormItem><FormLabel>Current City *</FormLabel><FormControl><Input placeholder="e.g. Mumbai" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
+            <div className="relative max-h-[90vh] overflow-y-auto pr-4">
+                <DialogHeader>
+                    <DialogTitle>Enquire for: {experience.title}</DialogTitle>
+                    <DialogDescription>
+                        Do you have any questions before you book? The expert team will get back to you shortly.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField control={form.control} name="name" render={({ field }) => (
+                                <FormItem><FormLabel>Your Name *</FormLabel><FormControl><Input placeholder="John Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="email" render={({ field }) => (
+                                <FormItem><FormLabel>Email address *</FormLabel><FormControl><Input placeholder="john.doe@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="phone" render={({ field }) => (
+                                <FormItem><FormLabel>Phone Number *</FormLabel><FormControl><Input placeholder="+91 12345 67890" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="city" render={({ field }) => (
+                                <FormItem><FormLabel>Current City *</FormLabel><FormControl><Input placeholder="e.g. Mumbai" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                        </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                         <FormField control={form.control} name="adults" render={({ field }) => (
-                            <FormItem><FormLabel>Adults</FormLabel><FormControl><Input type="number" min={1} {...field} /></FormControl><FormMessage /></FormItem>
+                        <div className="grid grid-cols-3 gap-4">
+                            <FormField control={form.control} name="adults" render={({ field }) => (
+                                <FormItem><FormLabel>Adults</FormLabel><FormControl><Input type="number" min={1} {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="children" render={({ field }) => (
+                                <FormItem><FormLabel>Children</FormLabel><FormControl><Input type="number" min={0} {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="infants" render={({ field }) => (
+                                <FormItem><FormLabel>Infants</FormLabel><FormControl><Input type="number" min={0} {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                        </div>
+                        <FormField
+                            control={form.control}
+                            name="dateOfTravel"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                <FormLabel>Date Of Travel *</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value ? (
+                                            format(field.value, "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        disabled={(date) =>
+                                            date < new Date() || date < new Date("1900-01-01")
+                                        }
+                                        initialFocus
+                                    />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                        <FormField control={form.control} name="query" render={({ field }) => (
+                            <FormItem><FormLabel>Your question *</FormLabel><FormControl><Textarea placeholder="Please write Your Queries..." {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                         <FormField control={form.control} name="children" render={({ field }) => (
-                            <FormItem><FormLabel>Children</FormLabel><FormControl><Input type="number" min={0} {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                         <FormField control={form.control} name="infants" render={({ field }) => (
-                            <FormItem><FormLabel>Infants</FormLabel><FormControl><Input type="number" min={0} {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
-                     <FormField
-                        control={form.control}
-                        name="dateOfTravel"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                            <FormLabel>Date Of Travel *</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                    )}
-                                    >
-                                    {field.value ? (
-                                        format(field.value, "PPP")
-                                    ) : (
-                                        <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) =>
-                                        date < new Date() || date < new Date("1900-01-01")
-                                    }
-                                    initialFocus
-                                />
-                                </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    <FormField control={form.control} name="query" render={({ field }) => (
-                        <FormItem><FormLabel>Your question *</FormLabel><FormControl><Textarea placeholder="Please write Your Queries..." {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <Button type="submit" className="w-full" disabled={isPending}>
-                        {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit Enquiry"}
-                    </Button>
-                </form>
-            </Form>
+                        <Button type="submit" className="w-full" disabled={isPending}>
+                            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit Enquiry"}
+                        </Button>
+                    </form>
+                </Form>
+            </div>
         </DialogContent>
     </Dialog>
   );
