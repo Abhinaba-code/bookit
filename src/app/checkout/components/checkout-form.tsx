@@ -85,7 +85,7 @@ const formatInUTC = (date: Date | string, fmt: string) => {
 };
 
 
-export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export function CheckoutForm({ bookingId, experienceId, slotId }: { bookingId?: string, experienceId?: number, slotId?: number }) {
   const router = useRouter();
   const { toast } = useToast();
   const { user, deductBalance } = useAuth();
@@ -99,15 +99,11 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
 
-  const bookingId = searchParams.bookingId as string | undefined;
-  const experienceId = searchParams.experienceId ? Number(searchParams.experienceId) : undefined;
-  const slotId = searchParams.slotId ? Number(searchParams.slotId) : undefined;
-
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: undefined,
-      slotId: undefined,
+      slotId: slotId,
       adults: 1,
       children: 0,
       infants: 0,
@@ -123,15 +119,13 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
   });
 
   useEffect(() => {
-    // This effect should only run when the necessary params are available.
-    // Suspense on the parent page ensures this component doesn't render until they are.
-    if (!bookingId && !experienceId) {
-      toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
-      router.push('/dashboard');
-      return;
-    }
-
     async function loadData() {
+        if (!bookingId && !experienceId) {
+          toast({ title: "Error", description: "No valid booking or experience ID provided.", variant: "destructive" });
+          router.push('/dashboard');
+          return;
+        }
+
         setIsLoading(true);
         let bookingToEdit: Booking | undefined;
         let loadedExperience: ExperienceDetail | null = null;
@@ -139,19 +133,17 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
 
         try {
             if (bookingId) {
-                // EDITING a booking
                 const bookings = getStoredBookings();
                 bookingToEdit = bookings.find((b) => b.id === bookingId);
                 if (!bookingToEdit) throw new Error("Booking not found.");
                 
                 loadedExperience = await getExperienceById(bookingToEdit.experienceId);
-                loadedSlot = await getSlotById(bookingToEdit.slotId) || undefined;
+                loadedSlot = (await getSlotById(bookingToEdit.slotId)) || undefined;
 
             } else if (experienceId) {
-                // CREATING a new booking
                 loadedExperience = await getExperienceById(experienceId);
                 if (slotId) {
-                    loadedSlot = await getSlotById(slotId) || undefined;
+                    loadedSlot = (await getSlotById(slotId)) || undefined;
                 }
             }
 
@@ -161,7 +153,6 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
 
             setCheckoutData({ experience: loadedExperience, slot: loadedSlot, bookingToEdit });
 
-            // Pre-fill form if editing
             if (bookingToEdit) {
                 const nameParts = bookingToEdit.name.split(' ');
                 const title = nameParts[0];
@@ -171,7 +162,7 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
                 form.reset({
                     id: bookingToEdit.id,
                     slotId: bookingToEdit.slotId,
-                    adults: bookingToEdit.adults ?? bookingToEdit.numGuests, // Use specific guest counts if available
+                    adults: bookingToEdit.adults ?? bookingToEdit.numGuests,
                     children: bookingToEdit.children ?? 0,
                     infants: bookingToEdit.infants ?? 0,
                     title: title,
@@ -182,14 +173,14 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
                     dob: parseISO(bookingToEdit.dob),
                     gender: bookingToEdit.gender,
                     promoCode: bookingToEdit.promoCode || "",
-                    agreedToTerms: true, // Assume they agreed before
+                    agreedToTerms: true,
                 });
             } else if (loadedSlot) {
                  form.setValue('slotId', loadedSlot.id);
             }
 
         } catch (error: any) {
-            toast({ title: "Error", description: error.message, variant: "destructive" });
+            toast({ title: "Error loading page", description: error.message, variant: "destructive" });
             router.push('/dashboard');
         } finally {
             setIsLoading(false);
@@ -514,5 +505,3 @@ export function CheckoutForm({ searchParams }: { searchParams: { [key: string]: 
     </Form>
   );
 }
-
-    

@@ -27,6 +27,10 @@ function CheckoutSkeleton() {
 }
 
 export default function CheckoutPage({ searchParams }: Props) {
+  const bookingId = searchParams.bookingId as string | undefined;
+  const experienceId = searchParams.experienceId ? Number(searchParams.experienceId) : undefined;
+  const slotId = searchParams.slotId ? Number(searchParams.slotId) : undefined;
+
   return (
     <Container className="py-12">
       <div className="max-w-6xl mx-auto">
@@ -39,11 +43,13 @@ export default function CheckoutPage({ searchParams }: Props) {
             </p>
         </div>
         <Suspense fallback={<CheckoutSkeleton />}>
-            <CheckoutForm searchParams={searchParams} />
+            <CheckoutForm 
+              bookingId={bookingId}
+              experienceId={experienceId}
+              slotId={slotId}
+            />
         </Suspense>
       </div>
     </Container>
   );
 }
-
-    
