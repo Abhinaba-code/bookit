@@ -1,5 +1,5 @@
 {
-    "name": "book-it",
+    "name": "bookit",
     "compatibility_date": "2025-12-12",
     "main": "src/index.ts"
   }
